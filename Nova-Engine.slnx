@@ -1,4 +1,4 @@
 <Solution> 
 	<Project Path="Nova\Nova.csproj"/>
-	<Project Path="Nova\Source\Libraries\unsafe-maps\unsafe-maps.csproj"/>
+	<Project Path="Nova\Libraries\unsafe-maps\unsafe-maps.csproj"/>
 </Solution>

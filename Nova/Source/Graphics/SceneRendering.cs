@@ -1,46 +1,50 @@
 using System.Numerics;
 using Silk.NET.GLFW;
 using Silk.NET.OpenGL;
+using unsafe_maps.maps;
 
 namespace Nova
 {
-    public struct ObjectData
+    public struct ObjectData : IDisposable
     {
         public Transform Transform;
         public MeshRenderer Renderer;
+
+        public void Dispose()
+        {
+            Renderer.lineIndices.Dispose();
+        }
     }
 
-    public unsafe struct SceneRendering
+    public unsafe struct SceneRendering : IDisposable
     {
         public ShaderSetter Shader { get; set; }
         public Transform CameraTransform { get; set; }
 
-        private List<ObjectData> objectAllDatas { get; set; }
-        public ObjectData[] ObjectDatas { get; set; }
+        public UnsafeList<ObjectData> ObjectDatas;
 
         public bool ModeLineRender { get; set; }
 
-        private Glfw glfw;
-        private GL gl;
-
         private bool isBinding { get; set; }
 
-        public void Init(Glfw glfW, GL gL)
+        public void Init()
         {
             ModeLineRender = ModeLineRender = false;
 
-            glfw = glfW;
-            gl = gL;
+            Shader = new ShaderSetter(GContext._GL, new Shader());
 
-            Shader = new ShaderSetter(gl, new Shader());
-
-            objectAllDatas = [];
+            ObjectDatas = new UnsafeList<ObjectData>(100);
 
             isBinding = false;
         }
 
         public void AddObject(string path, Material mat)
         {
+            GL gl = GContext._GL;
+
+            if (gl == null)
+                return;
+
             var mesh = MeshLoader.Load(path);
             
             uint _vao = gl.GenVertexArray();
@@ -50,18 +54,14 @@ namespace Nova
             gl.BindVertexArray(_vao);
 
             // Vertex buffer
-            fixed (float* v = &mesh.Vertices[0])
-            {
-                gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
-                gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(mesh.Vertices.Length * sizeof(float)), v, BufferUsageARB.StaticDraw);
-            }
+            gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
+            gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(mesh.Vertices.Length * sizeof(float)), mesh.Vertices.Data, BufferUsageARB.StaticDraw);
+            
 
             // Index buffer
-            fixed (uint* i = &mesh.Indices[0])
-            {
-                gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
-                gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(mesh.Indices.Length * sizeof(uint)), i, BufferUsageARB.StaticDraw);
-            }
+            gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
+            gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(mesh.Indices.Length * sizeof(uint)), mesh.Indices.Data, BufferUsageARB.StaticDraw);
+            
 
             uint stride = 11 * sizeof(float);
 
@@ -101,7 +101,7 @@ namespace Nova
 
             Shader.SetVector4("uColor", mat.Color);
 
-            objectAllDatas.Add(new ObjectData()
+            ObjectDatas.Add(new ObjectData()
             {
                 Transform = new Transform()
                 {
@@ -127,78 +127,76 @@ namespace Nova
             Shader.SetVector3("uLightDir", new Vector3(0f, 1f, 1f));
             Shader.SetFloat("uLightIntensity", 2f);
 
-            ObjectDatas = objectAllDatas.ToArray();
-
             if (ObjectDatas.Length == 0)
                 return;
 
-            fixed (ObjectData* path = &ObjectDatas[0])
+            for (int i = 0; i < ObjectDatas.Length; i++)
             {
-                for (int i = 0; i < ObjectDatas.Length; i++)
-                {
-                    ObjectData* _object = path + i;
+                ObjectData _object = ObjectDatas[i];
 
-                    _object->Transform.Scale = new Vector3(0.5f, 0.5f, 0.5f);
-                    _object->Transform.Position.Y = -5;
-                }
+                _object.Transform.Scale = new Vector3(0.5f, 0.5f, 0.5f);
+                _object.Transform.Position.Y = -5;
             }
         }
 
         public void Rendering(WindowHandle* window)
         {
+            Glfw glfw = GContext._Glfw;
+            GL gl = GContext._GL;
+
+            if (gl == null || glfw == null)
+                return;
+
             float time = (float)glfw.GetTime();
 
             Matrix4x4 view = Matrix4x4.CreateLookAt(CameraTransform.Position, CameraTransform.Position + CameraTransform.GetForward(), Vector3.UnitY);
             Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, 900f / 800f, 0.1f, 200f);
 
             Shader.SetVector3("uViewPos", CameraTransform.Position);
-            
-            fixed (ObjectData* path = &ObjectDatas[0])
+
+            for (int i = 0; i < ObjectDatas.Length; i++)
             {
-                for (int i = 0; i < ObjectDatas.Length; i++)
+                ObjectData _object = ObjectDatas[i];
+
+                _object.Transform.Rotation.Y = time / 2;
+
+                Matrix4x4 model = _object.Transform.LocalToWorldMatrix;
+
+                Matrix4x4 mvp = model * view * proj;
+
+                gl.UniformMatrix4(_object.Transform.ModelLoc, 1, false, &model.M11);
+                gl.UniformMatrix4(_object.Transform.MvpLoc, 1, false, &mvp.M11);
+
+                Shader.SetMatrix4("uMVP", mvp);
+                Shader.SetMatrix4("uModel", model);
+
+                gl.BindVertexArray(_object.Renderer.vao);
+
+                if (ModeLineRender)
                 {
-                    ObjectData* _object = path + i;
-
-                    _object->Transform.Rotation.Y = time / 2;
-
-                    Matrix4x4 model = _object->Transform.LocalToWorldMatrix;
-
-                    Matrix4x4 mvp = model * view * proj;
-
-                    gl.UniformMatrix4(_object->Transform.ModelLoc, 1, false, &model.M11);
-                    gl.UniformMatrix4(_object->Transform.MvpLoc, 1, false, &mvp.M11);
-
-                    Shader.SetMatrix4("uMVP", mvp);
-                    Shader.SetMatrix4("uModel", model);
-
-                    gl.BindVertexArray(_object->Renderer.vao);
-
-                    if (ModeLineRender)
+                    if (isBinding)
                     {
-                        if (isBinding)
-                        {
-                            _object->Renderer.material.BaseMap.UnBind(TextureUnit.Texture0);
-                            _object->Renderer.material.NormalMap.UnBind(TextureUnit.Texture1);
-                            _object->Renderer.material.MetallicMap.UnBind(TextureUnit.Texture2);
+                        _object.Renderer.material.BaseMap.UnBind(TextureUnit.Texture0);
+                        _object.Renderer.material.NormalMap.UnBind(TextureUnit.Texture1);
+                        _object.Renderer.material.MetallicMap.UnBind(TextureUnit.Texture2);
 
-                            isBinding = false;
-                        }
-
-                        gl.DrawElements(PrimitiveType.Lines, (uint)_object->Renderer.lineIndices.Length, DrawElementsType.UnsignedInt, (void*)0);
+                        isBinding = false;
                     }
-                    else
+
+                    gl.DrawElements(PrimitiveType.Lines, (uint)_object.Renderer.lineIndices.Length, DrawElementsType.UnsignedInt, (void*)0);
+                }
+                else
+                {
+                    if (!isBinding)
                     {
-                        if (!isBinding)
-                        {
-                            _object->Renderer.material.BaseMap.Bind(TextureUnit.Texture0);
-                            _object->Renderer.material.NormalMap.Bind(TextureUnit.Texture1);
-                            _object->Renderer.material.MetallicMap.Bind(TextureUnit.Texture2);
+                        _object.Renderer.material.BaseMap.Bind(TextureUnit.Texture0);
+                        _object.Renderer.material.NormalMap.Bind(TextureUnit.Texture1);
+                        _object.Renderer.material.MetallicMap.Bind(TextureUnit.Texture2);
 
-                            isBinding = true;
-                        }
-
-                        gl.DrawElements(PrimitiveType.Triangles, (uint)_object->Renderer.mesh.Indices.Length, DrawElementsType.UnsignedInt, (void*)0);
+                        isBinding = true;
                     }
+
+                    gl.DrawElements(PrimitiveType.Triangles, (uint)_object.Renderer.mesh.Indices.Length, DrawElementsType.UnsignedInt, (void*)0);
                 }
             }
 
@@ -207,6 +205,19 @@ namespace Nova
 
             gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
             gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+        }
+
+        public void Dispose()
+        {
+            for (int i = 0; i < ObjectDatas.Length; i++)
+            {
+                ObjectData objectData = ObjectDatas[i];
+
+                objectData.Dispose();
+            }
+
+            ObjectDatas.Dispose();
+            Shader.Dispose();
         }
     }
 }

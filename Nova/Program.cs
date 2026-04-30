@@ -7,14 +7,14 @@ namespace Nova
     unsafe class Program
     {
         private static WindowHandle* window;
-        private static Glfw glfw;
-        private static GL gl;
 
         static void Main()
         {
             SetupDisplayBackend();
 
-            glfw = Glfw.GetApi();
+            GContext._Glfw = Glfw.GetApi();
+
+            Glfw glfw = GContext._Glfw;
 
             if (!glfw.Init())
             {
@@ -38,7 +38,9 @@ namespace Nova
 
             glfw.MakeContextCurrent(window);
 
-            gl = GL.GetApi(glfw.GetProcAddress);
+            GContext._GL = GL.GetApi(glfw.GetProcAddress);
+
+            GL gl = GContext._GL;
 
             glfw.SetFramebufferSizeCallback(window, (wnd, width, height) =>
             {
@@ -47,15 +49,21 @@ namespace Nova
 
             gl.Viewport(0, 0, 900, 700);
 
-            var _baseMap = new Texture2D(gl, TexFormat.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
-            var _normalMap = new Texture2D(gl, TexFormat.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
-            var _metallicMap = new Texture2D(gl, TexFormat.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
+            var _baseMap = new Texture2D(TexFormat.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
+            var _normalMap = new Texture2D(TexFormat.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
+            var _metallicMap = new Texture2D(TexFormat.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
 
-            var mat = new Material() { Color = new Vector4(1, 1, 1, 1), BaseMap = _baseMap, NormalMap = _normalMap, MetallicMap = _metallicMap};
+            var mat = new Material()
+            {
+                Color = new Vector4(1, 1, 1, 1),
+                BaseMap = _baseMap,
+                NormalMap = _normalMap,
+                MetallicMap = _metallicMap
+            };
 
             SceneRendering rendering = new();
 
-            rendering.Init(glfw, gl);
+            rendering.Init();
             rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
             rendering.InitializeObject();
 
@@ -87,19 +95,16 @@ namespace Nova
 
             if (rendering.ObjectDatas.Length > 0)
             {
-                fixed (ObjectData* path = &rendering.ObjectDatas[0])
+                for (int i = 0; i < rendering.ObjectDatas.Length; i++)
                 {
-                    for (int i = 0; i < rendering.ObjectDatas.Length; i++)
-                    {
-                        ObjectData* objectData = path + i;
+                    ObjectData objectData = rendering.ObjectDatas[i];
 
-                        gl.DeleteBuffer(objectData->Renderer.vbo);
-                        gl.DeleteVertexArray(objectData->Renderer.vao);
-                    }
+                    gl.DeleteBuffer(objectData.Renderer.vbo);
+                    gl.DeleteVertexArray(objectData.Renderer.vao);
                 }
             }
 
-            rendering.Shader.Dispose();
+            rendering.Dispose();
 
             glfw.DestroyWindow(window);
             glfw.Terminate();
@@ -130,7 +135,5 @@ namespace Nova
                 Environment.SetEnvironmentVariable("GDK_BACKEND", "x11");
             }
         }
-
-
     }
 }

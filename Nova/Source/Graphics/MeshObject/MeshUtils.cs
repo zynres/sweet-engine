@@ -1,8 +1,10 @@
+using unsafe_maps.maps;
+
 namespace Nova
 {
-    public static class MeshUtils
+    public struct MeshUtils
     {
-        public static uint[] GenerateUniqueEdges(uint[] triangleIndices)
+        public static UnsafeArray<uint> GenerateUniqueEdges(UnsafeArray<uint> triangleIndices)
         {
             var edges = new HashSet<(uint, uint)>();
 
@@ -17,7 +19,18 @@ namespace Nova
                 AddEdge(edges, c, a);
             }
 
-            return edges.SelectMany(e => new[] { e.Item1, e.Item2 }).ToArray(); ;
+            var values = edges.SelectMany(e => new[] { e.Item1, e.Item2 }).ToArray();
+
+            var indices = new UnsafeArray<uint>(values.Length);
+
+            for (int i = 0; i < indices.Length; i++)
+            {
+                uint index = indices[i];
+
+                index = values[i];
+            }
+
+            return indices;
         }
 
         private static void AddEdge(HashSet<(uint, uint)> edges, uint v1, uint v2)

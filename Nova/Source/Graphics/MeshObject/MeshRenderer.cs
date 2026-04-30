@@ -1,3 +1,5 @@
+using unsafe_maps.maps;
+
 namespace Nova
 {
     public struct MeshRenderer
@@ -5,6 +7,6 @@ namespace Nova
         public Mesh mesh;
         public Material material;
         public uint vao, vbo, ebo;
-        public uint[] lineIndices;
+        public UnsafeArray<uint> lineIndices;
     }
 }
