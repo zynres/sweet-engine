@@ -10,17 +10,17 @@ namespace Nova
         {
             var lines = File.ReadAllLines(path);
 
-            using UnsafeList<Vector3> positions = new(2);
-            using UnsafeList<Vector3> normals = new(2);
-            using UnsafeList<Vector2> uvs = new(2);
+            using UnsafeList<Vector3> positions = new(50);
+            using UnsafeList<Vector3> normals = new(50);
+            using UnsafeList<Vector2> uvs = new(50);
 
-            using UnsafeList<float> finalVerts = new(2);
-            using UnsafeList<uint> indices = new(2);
+            using UnsafeList<float> finalVerts = new(50);
+            using UnsafeList<uint> indices = new(50);
             Dictionary<VertexKey, uint> vertexMap = new();
 
-            using UnsafeList<Vector3> vertexPositions = new(2);
-            using UnsafeList<Vector2> vertexUVs = new(2);
-            using UnsafeList<Vector3> tan1 = new(2);
+            using UnsafeList<Vector3> vertexPositions = new(50);
+            using UnsafeList<Vector2> vertexUVs = new(50);
+            using UnsafeList<Vector3> tan1 = new(50);
 
             foreach (var line in lines)
             {
