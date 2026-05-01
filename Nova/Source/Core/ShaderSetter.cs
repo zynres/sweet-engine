@@ -7,7 +7,7 @@ namespace Nova
     {
         public uint Handle { get; private set; }
 
-        public ShaderSetter(Shader shader)
+        public void SetShader(Shader shader)
         {
             GL gl = GContext._GL;
 

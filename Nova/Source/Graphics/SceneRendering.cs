@@ -18,7 +18,7 @@ namespace Nova
 
     public unsafe struct SceneRendering : IDisposable
     {
-        public ShaderSetter Shader { get; set; }
+        public ShaderSetter ShaderSetter { get; set; }
         public Transform CameraTransform { get; set; }
 
         public UnsafeList<ObjectData> ObjectDatas;
@@ -31,7 +31,8 @@ namespace Nova
         {
             ModeLineRender = ModeLineRender = false;
 
-            Shader = new ShaderSetter(new Shader());
+            ShaderSetter = new ShaderSetter();
+            ShaderSetter.SetShader(new Shader());
 
             ObjectDatas = new UnsafeList<ObjectData>(100);
 
@@ -85,21 +86,21 @@ namespace Nova
 
             gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
 
-            int modelLocation = gl.GetUniformLocation(Shader.Handle, "uModel");
-            int mvpLocation = gl.GetUniformLocation(Shader.Handle, "uMVP");
+            int modelLocation = gl.GetUniformLocation(ShaderSetter.Handle, "uModel");
+            int mvpLocation = gl.GetUniformLocation(ShaderSetter.Handle, "uMVP");
 
             gl.FrontFace(FrontFaceDirection.Ccw);
             gl.Enable(EnableCap.DepthTest);
 
             gl.LineWidth(1f);
 
-            Shader.Use();
+            ShaderSetter.Use();
 
-            Shader.SetInt("uBaseMap", 0);
-            Shader.SetInt("uNormalMap", 1);
-            Shader.SetInt("uMetallicMap", 2);
+            ShaderSetter.SetInt("uBaseMap", 0);
+            ShaderSetter.SetInt("uNormalMap", 1);
+            ShaderSetter.SetInt("uMetallicMap", 2);
 
-            Shader.SetVector4("uColor", mat.Color);
+            ShaderSetter.SetVector4("uColor", mat.Color);
 
             ObjectDatas.Add(new ObjectData()
             {
@@ -124,11 +125,8 @@ namespace Nova
         {
             CameraTransform = new() { Position = new(0, 0, 35f) };
 
-            Shader.SetVector3("uLightDir", new Vector3(0f, 1f, 1f));
-            Shader.SetFloat("uLightIntensity", 2f);
-
-            if (ObjectDatas.Length == 0)
-                return;
+            ShaderSetter.SetVector3("uLightDir", new Vector3(0f, 1f, 1f));
+            ShaderSetter.SetFloat("uLightIntensity", 2f);
 
             for (int i = 0; i < ObjectDatas.Length; i++)
             {
@@ -136,6 +134,15 @@ namespace Nova
 
                 _object.Transform.Scale = new Vector3(0.5f, 0.5f, 0.5f);
                 _object.Transform.Position.Y = -5;
+            }
+
+            for (int i = 0; i < ObjectDatas.Length; i++)
+            {
+                ObjectData* _object = ObjectDatas.Data + i;
+
+                Console.WriteLine(_object->Transform.Scale);
+                Console.WriteLine(_object->Transform.Position);
+                Console.WriteLine(_object->Transform.Position.Y);
             }
         }
 
@@ -152,7 +159,7 @@ namespace Nova
             Matrix4x4 view = Matrix4x4.CreateLookAt(CameraTransform.Position, CameraTransform.Position + CameraTransform.GetForward(), Vector3.UnitY);
             Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, 900f / 800f, 0.1f, 200f);
 
-            Shader.SetVector3("uViewPos", CameraTransform.Position);
+            ShaderSetter.SetVector3("uViewPos", CameraTransform.Position);
 
             for (int i = 0; i < ObjectDatas.Length; i++)
             {
@@ -167,8 +174,8 @@ namespace Nova
                 gl.UniformMatrix4(_object.Transform.ModelLoc, 1, false, &model.M11);
                 gl.UniformMatrix4(_object.Transform.MvpLoc, 1, false, &mvp.M11);
 
-                Shader.SetMatrix4("uMVP", mvp);
-                Shader.SetMatrix4("uModel", model);
+                ShaderSetter.SetMatrix4("uMVP", mvp);
+                ShaderSetter.SetMatrix4("uModel", model);
 
                 gl.BindVertexArray(_object.Renderer.vao);
 
@@ -220,7 +227,7 @@ namespace Nova
             }
 
             ObjectDatas.Dispose();
-            Shader.Dispose();
+            ShaderSetter.Dispose();
         }
     }
 }
