@@ -5,99 +5,108 @@ using System.Runtime.InteropServices;
 
 namespace Nova
 {
-    public unsafe class Program
+    unsafe class Program
     {
         private static WindowHandle* window;
 
-        public static void Main(string[] args)
+        static void Main()
         {
-            SetupDisplayBackend();
-
-            GContext._Glfw = Glfw.GetApi();
-
-            Glfw glfw = GContext._Glfw;
-
-            if (!glfw.Init())
+            try
             {
-                Console.WriteLine("Failed to init GLFW");
-                return;
-            }
+                SetupDisplayBackend();
 
-            _ = AssetDirectories.Root;
+                GContext._Glfw = Glfw.GetApi();
 
-            glfw.WindowHint(WindowHintInt.ContextVersionMajor, 3);
-            glfw.WindowHint(WindowHintInt.ContextVersionMinor, 3);
-            glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.OpenGL);
+                var glfw = GContext._Glfw;
 
-            window = glfw.CreateWindow(900, 800, "Nova Engine", null, null);
-
-            if (window == null)
-            {
-                Console.WriteLine("Failed to create window");
-                return;
-            }
-
-            glfw.MakeContextCurrent(window);
-
-            GContext._GL = GL.GetApi(glfw.GetProcAddress);
-
-            GL gl = GContext._GL;
-
-            glfw.SetFramebufferSizeCallback(window, (wnd, width, height) =>
-            {
-                gl.Viewport(0, 0, (uint)width, (uint)height);
-            });
-
-            gl.Viewport(0, 0, 900, 800);
-
-            var _baseMap = new Texture2D(TexFormat.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
-            var _normalMap = new Texture2D(TexFormat.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
-            var _metallicMap = new Texture2D(TexFormat.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
-
-            var mat = new Material()
-            {
-                Color = new Vector4(1, 1, 1, 1),
-                BaseMap = _baseMap,
-                NormalMap = _normalMap,
-                MetallicMap = _metallicMap
-            };
-
-            SceneRendering rendering = new();
-
-            rendering.Init();
-            rendering.AddObject(AssetDirectories.Models + "/cube.obj", mat);
-            rendering.InitializeObject();
-
-            while (!glfw.WindowShouldClose(window))
-            {
-                glfw.PollEvents();
-
-                if (InputAction.Press == (InputAction)glfw.GetKey(window, Keys.Number1))
+                if (!glfw.Init())
                 {
-                    if (rendering.ModeLineRender)
-                    {
-                        rendering.ModeLineRender = false;
-
-                        Console.WriteLine($"[Render Mode] => Fill mode");
-                    }
-                }
-                else if (InputAction.Press == (InputAction)glfw.GetKey(window, Keys.Number2))
-                {
-                    if (!rendering.ModeLineRender)
-                    {
-                        rendering.ModeLineRender = true;
-
-                        Console.WriteLine($"[Render Mode] => LineOnly");
-                    }
+                    Console.WriteLine("Failed to init GLFW");
+                    return;
                 }
 
-                rendering.Rendering(window);
+                _ = AssetDirectories.Root;
+
+                glfw.WindowHint(WindowHintInt.ContextVersionMajor, 3);
+                glfw.WindowHint(WindowHintInt.ContextVersionMinor, 3);
+                glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.OpenGL);
+
+                window = glfw.CreateWindow(900, 800, "Nova Engine", null, null);
+
+                if (window == null)
+                {
+                    Console.WriteLine("Failed to create window");
+                    return;
+                }
+
+                glfw.MakeContextCurrent(window);
+
+                GContext._GL = GL.GetApi(glfw.GetProcAddress);
+
+                var gl = GContext._GL;
+
+                glfw.SetFramebufferSizeCallback(window, (wnd, width, height) =>
+                {
+                    gl.Viewport(0, 0, (uint)width, (uint)height);
+                });
+
+                gl.Viewport(0, 0, 900, 800);
+
+                glfw.SetWindowOpacity(window, 0.9f);
+
+                var _baseMap = new Texture2D(TexFormat.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
+                var _normalMap = new Texture2D(TexFormat.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
+                var _metallicMap = new Texture2D(TexFormat.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
+
+                var mat = new Material()
+                {
+                    Color = new Vector4(1, 1, 1, 1),
+                    BaseMap = _baseMap,
+                    NormalMap = _normalMap,
+                    MetallicMap = _metallicMap
+                };
+
+                SceneRendering rendering = new();
+
+                rendering.Init();
+                rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
+                rendering.InitializeObject();
+
+                while (!glfw.WindowShouldClose(window))
+                {
+                    glfw.PollEvents();
+
+                    if (InputAction.Press == (InputAction)glfw.GetKey(window, Keys.Number1))
+                    {
+                        if (rendering.IsLineRender)
+                        {
+                            rendering.IsLineRender = false;
+
+                            Console.WriteLine($"[Render Mode] => Fill mode");
+                        }
+                    }
+                    else if (InputAction.Press == (InputAction)glfw.GetKey(window, Keys.Number2))
+                    {
+                        if (!rendering.IsLineRender)
+                        {
+                            rendering.IsLineRender = true;
+
+                            Console.WriteLine($"[Render Mode] => LineOnly");
+                        }
+                    }
+
+                    rendering.Rendering(window);
+                }
+
+                rendering.Dispose();
+
+                glfw.DestroyWindow(window);
+                glfw.Terminate();
             }
-
-            rendering.Dispose();
-
-            glfw.DestroyWindow(window);
-            glfw.Terminate();
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);   
+            }
         }
 
         static void SetupDisplayBackend()
@@ -107,7 +116,7 @@ namespace Nova
                 Console.WriteLine("Running on Windows - no display setup needed");
                 return;
             }
-            
+
             string waylandDisplay = Environment.GetEnvironmentVariable("WAYLAND_DISPLAY");
             string x11Display = Environment.GetEnvironmentVariable("DISPLAY");
 
@@ -131,5 +140,7 @@ namespace Nova
                 Environment.SetEnvironmentVariable("GDK_BACKEND", "x11");
             }
         }
+
+
     }
 }

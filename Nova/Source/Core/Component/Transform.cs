@@ -41,7 +41,7 @@ namespace Nova
             }
         }
 
-        public Vector3 GetForward()
+        public readonly Vector3 GetForward()
         {
             float cosY = MathF.Cos(Rotation.Y);
             float sinY = MathF.Sin(Rotation.Y);

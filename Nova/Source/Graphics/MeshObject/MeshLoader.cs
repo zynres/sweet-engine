@@ -1,8 +1,6 @@
 using System.Globalization;
-using unsafe_maps.maps;
 using System.Numerics;
-using Silk.NET.OpenGL;
-using unsafe_maps;
+using unsafe_maps.maps;
 
 namespace Nova
 {

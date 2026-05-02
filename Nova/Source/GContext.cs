@@ -5,6 +5,6 @@ namespace Nova;
 
 public static class GContext
 {
-    public static Glfw _Glfw;
     public static GL _GL;
+    public static Glfw _Glfw;
 }

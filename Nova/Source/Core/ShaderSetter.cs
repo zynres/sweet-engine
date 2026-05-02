@@ -7,9 +7,9 @@ namespace Nova
     {
         public uint Handle { get; private set; }
 
-        public void SetShader(Shader shader)
+        public ShaderSetter(Shader shader)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             uint vertex = gl.CreateShader(ShaderType.VertexShader);
             gl.ShaderSource(vertex, shader.vertexSrc);
@@ -33,57 +33,55 @@ namespace Nova
             gl.DeleteShader(fragment);
         }
 
-        public readonly void Use() => GContext._GL.UseProgram(Handle);
+        public void Use() => GContext._GL.UseProgram(Handle);
 
-        public readonly void SetInt(string name, int value)
+        public void SetInt(string name, int value)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             int loc = gl.GetUniformLocation(Handle, name);
             gl.Uniform1(loc, value);
         }
 
-        public readonly void SetFloat(string name, float value)
+        public void SetFloat(string name, float value)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             int loc = gl.GetUniformLocation(Handle, name);
             gl.Uniform1(loc, value);
         }
 
-        public readonly void SetVector4(string name, Vector4 vec)
+        public void SetVector4(string name, Vector4 vec)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             int loc = gl.GetUniformLocation(Handle, name);
             gl.Uniform4(loc, vec.X, vec.Y, vec.Z, vec.W);
         }
 
-        public readonly void SetVector3(string name, Vector3 vec)
+        public void SetVector3(string name, Vector3 vec)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             int loc = gl.GetUniformLocation(Handle, name);
             gl.Uniform3(loc, vec.X, vec.Y, vec.Z);
         }
 
-        public readonly void SetMatrix4(string name, Matrix4x4 mat)
+        public void SetMatrix4(string name, Matrix4x4 mat)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             int loc = gl.GetUniformLocation(Handle, name);
-                
+
             unsafe
             {
-               
                 gl.UniformMatrix4(loc, 1, false, (float*)&mat);
-        
             }
         }
 
-        private readonly void CheckCompileErrors(uint shader, string type)
+        private void CheckCompileErrors(uint shader, string type)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             gl.GetShader(shader, ShaderParameterName.CompileStatus, out int status);
             if (status == 0)
@@ -93,9 +91,9 @@ namespace Nova
             }
         }
 
-        private readonly void CheckLinkErrors(uint program)
+        private void CheckLinkErrors(uint program)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             gl.GetProgram(program, ProgramPropertyARB.LinkStatus, out int status);
             if (status == 0)
@@ -107,7 +105,7 @@ namespace Nova
 
         public void Dispose()
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             if (Handle != 0)
             {

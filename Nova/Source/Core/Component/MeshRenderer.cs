@@ -11,8 +11,8 @@ namespace Nova
 
         public void Dispose()
         {
-            mesh.Dispose();
             lineIndices.Dispose();
+            mesh.Dispose();
         }
     }
 }

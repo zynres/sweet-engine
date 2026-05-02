@@ -20,7 +20,7 @@ namespace Nova
 
         public Texture2D(TexFormat texFormat = TexFormat.None, string path = "")
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             try
             {
@@ -62,7 +62,7 @@ namespace Nova
 
         public readonly void Bind(TextureUnit unit)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             if (gl != null)
             {
@@ -73,7 +73,7 @@ namespace Nova
 
         public readonly void UnBind(TextureUnit unit)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             if (gl != null)
             {
@@ -84,7 +84,7 @@ namespace Nova
 
         public readonly uint CreateWhiteTexture(TexFormat texFormat)
         {
-            GL gl = GContext._GL;
+            var gl = GContext._GL;
 
             uint tex = gl.GenTexture();
             gl.BindTexture(TextureTarget.Texture2D, tex);
@@ -109,7 +109,7 @@ namespace Nova
                 fixed (byte* p = whitePixel)
                 {
                     gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, 1, 1, 0,
-                        PixelFormat.Rgba, PixelType.UnsignedByte, p);
+                                  PixelFormat.Rgba, PixelType.UnsignedByte, p);
                 }
             }
 
