@@ -2,7 +2,7 @@ using unsafe_maps.maps;
 
 namespace Nova
 {
-    public struct MeshUtils
+    public unsafe struct MeshUtils
     {
         public static UnsafeArray<uint> GenerateUniqueEdges(UnsafeArray<uint> triangleIndices)
         {
@@ -19,16 +19,16 @@ namespace Nova
                 AddEdge(edges, c, a);
             }
 
-            var values = edges.SelectMany(e => new[] { e.Item1, e.Item2 }).ToArray();
+            var indices = new UnsafeArray<uint>(edges.Count * 2);
 
-            var indices = new UnsafeArray<uint>(values.Length);
-
-            for (int i = 0; i < values.Length; i++)
+            int index = 0;
+            foreach (var (a, b) in edges)
             {
-                *indices[i] = values[i];
+                *indices[index++] = a;
+                *indices[index++] = b;
             }
 
-            indices.SetLength(values.Length);
+            indices.SetLength(index + 1);
 
             return indices;
         }

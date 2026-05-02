@@ -63,7 +63,6 @@ namespace Nova
             gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
             gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(mesh.Indices.Length * sizeof(uint)), mesh.Indices.Data, BufferUsageARB.StaticDraw);
             
-
             uint stride = 11 * sizeof(float);
 
             // position
@@ -135,15 +134,6 @@ namespace Nova
                 _object->Transform.Scale = new Vector3(0.5f, 0.5f, 0.5f);
                 _object->Transform.Position.Y = -5;
             }
-
-            for (int i = 0; i < ObjectDatas.Length; i++)
-            {
-                ObjectData* _object = ObjectDatas.Data + i;
-
-                Console.WriteLine(_object->Transform.Scale);
-                Console.WriteLine(_object->Transform.Position);
-                Console.WriteLine(_object->Transform.Position.Y);
-            }
         }
 
         public void Rendering(WindowHandle* window)
@@ -153,6 +143,9 @@ namespace Nova
 
             if (gl == null || glfw == null)
                 return;
+
+            gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
+            gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
 
             float time = (float)glfw.GetTime();
 
@@ -170,9 +163,6 @@ namespace Nova
                 Matrix4x4 model = _object->Transform.LocalToWorldMatrix;
 
                 Matrix4x4 mvp = model * view * proj;
-
-                gl.UniformMatrix4(_object->Transform.ModelLoc, 1, false, &model.M11);
-                gl.UniformMatrix4(_object->Transform.MvpLoc, 1, false, &mvp.M11);
 
                 ShaderSetter.SetMatrix4("uMVP", mvp);
                 ShaderSetter.SetMatrix4("uModel", model);
@@ -209,9 +199,6 @@ namespace Nova
 
             gl.BindVertexArray(0);
             glfw.SwapBuffers(window);
-
-            gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
-            gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         }
 
         public void Dispose()

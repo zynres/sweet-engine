@@ -29,7 +29,7 @@ namespace Nova
             glfw.WindowHint(WindowHintInt.ContextVersionMinor, 3);
             glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.OpenGL);
 
-            window = glfw.CreateWindow(900, 700, "Nova Engine", null, null);
+            window = glfw.CreateWindow(900, 800, "Nova Engine", null, null);
 
             if (window == null)
             {
@@ -48,7 +48,7 @@ namespace Nova
                 gl.Viewport(0, 0, (uint)width, (uint)height);
             });
 
-            gl.Viewport(0, 0, 900, 700);
+            gl.Viewport(0, 0, 900, 800);
 
             var _baseMap = new Texture2D(TexFormat.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
             var _normalMap = new Texture2D(TexFormat.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
@@ -65,7 +65,7 @@ namespace Nova
             SceneRendering rendering = new();
 
             rendering.Init();
-            rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
+            rendering.AddObject(AssetDirectories.Models + "/cube.obj", mat);
             rendering.InitializeObject();
 
             while (!glfw.WindowShouldClose(window))
