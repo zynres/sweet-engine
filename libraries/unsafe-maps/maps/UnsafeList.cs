@@ -66,7 +66,7 @@ public unsafe struct UnsafeList<T> : IUnsafeMap<T>, IDisposable where T : unmana
 
     public readonly void Set(int index, T value)
     {
-        if (index > Length)
+        if (index >= Length)
             throw new IndexOutOfRangeException();
 
         *(Data + index) = value;
