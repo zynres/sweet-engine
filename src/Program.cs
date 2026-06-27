@@ -69,37 +69,17 @@ namespace Nova
                     MetallicMap = _metallicMap
                 };
 
-                SceneRendering rendering = new();
+                IGraphicRenderer rendering = new OpenGLRenderer();
 
-                rendering.Init();
                 rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
                 rendering.AddObject(AssetDirectories.Models + "/cube.obj", mat);
-                rendering.InitializeObject();
+                rendering.InitializeObjects();
 
                 while (!glfw.WindowShouldClose(window))
                 {
                     glfw.PollEvents();
 
-                    if (Input.GetKeyDown(Keys.Number1))
-                    {
-                        if (rendering.IsLineRender)
-                        {
-                            rendering.IsLineRender = false;
-
-                            Console.WriteLine($"[Render Mode] => Fill mode");
-                        }
-                    }
-                    else if (Input.GetKeyDown(Keys.Number2))
-                    {
-                        if (!rendering.IsLineRender)
-                        {
-                            rendering.IsLineRender = true;
-
-                            Console.WriteLine($"[Render Mode] => LineOnly");
-                        }
-                    }
-
-                    rendering.Rendering(window);
+                    rendering.Render(window);
                 }
 
                 rendering.Dispose();
