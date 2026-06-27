@@ -11,7 +11,7 @@ namespace Nova
 
         static AssetDirectories()
         {
-            Root = Path.GetFullPath(Path.Combine("D:", "nova-engine", "assets"));
+            Root = Path.GetFullPath(Path.Combine("D:", "sweet-engine", "assets"));
             Models = Path.Combine(Root, "Models");
             Textures = Path.Combine(Root, "Textures");
             Shaders = Path.Combine(Root, "Shaders");
