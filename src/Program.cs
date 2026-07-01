@@ -4,127 +4,128 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using input;
 
-namespace Nova
+namespace Nova;
+
+unsafe class Program
 {
-    unsafe class Program
+    private static WindowHandle* window;
+
+    static void Main()
     {
-        private static WindowHandle* window;
-
-        static void Main()
+        try
         {
-            try
+            SetupDisplayBackend();
+
+            GContext._Glfw = Glfw.GetApi();
+
+            var glfw = GContext._Glfw;
+
+            if (!glfw.Init())
             {
-                SetupDisplayBackend();
-
-                GContext._Glfw = Glfw.GetApi();
-
-                var glfw = GContext._Glfw;
-
-                if (!glfw.Init())
-                {
-                    Console.WriteLine("Failed to init GLFW");
-                    return;
-                }
-
-                _ = AssetDirectories.Root;
-
-                glfw.WindowHint(WindowHintInt.ContextVersionMajor, 3);
-                glfw.WindowHint(WindowHintInt.ContextVersionMinor, 3);
-                glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.OpenGL);
-
-                window = glfw.CreateWindow(900, 800, "Nova Engine", null, null);
-
-                if (window == null)
-                {
-                    Console.WriteLine("Failed to create window");
-                    return;
-                }
-
-                glfw.MakeContextCurrent(window);
-
-                GContext._GL = GL.GetApi(glfw.GetProcAddress);
-
-                var gl = GContext._GL;
-
-                glfw.SetFramebufferSizeCallback(window, (wnd, width, height) =>
-                {
-                    gl.Viewport(0, 0, (uint)width, (uint)height);
-                });
-
-                gl.Viewport(0, 0, 900, 800);
-
-                glfw.SetWindowOpacity(window, 0.9f);
-
-                Input.Init(window, glfw);
-
-                var _baseMap = new Texture2D(TexFormat.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
-                var _normalMap = new Texture2D(TexFormat.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
-                var _metallicMap = new Texture2D(TexFormat.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
-
-                var mat = new Material()
-                {
-                    Color = new Vector4(1, 1, 1, 1),
-                    BaseMap = _baseMap,
-                    NormalMap = _normalMap,
-                    MetallicMap = _metallicMap
-                };
-
-                IGraphicRenderer rendering = new OpenGLRenderer();
-
-                rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
-                rendering.AddObject(AssetDirectories.Models + "/cube.obj", mat);
-                rendering.InitializeObjects();
-
-                while (!glfw.WindowShouldClose(window))
-                {
-                    glfw.PollEvents();
-
-                    rendering.Render(window);
-                }
-
-                rendering.Dispose();
-
-                glfw.DestroyWindow(window);
-                glfw.Terminate();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);   
-            }
-        }
-
-        static void SetupDisplayBackend()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Console.WriteLine("Running on Windows - no display setup needed");
+                Console.WriteLine("Failed to init GLFW");
                 return;
             }
 
-            string waylandDisplay = Environment.GetEnvironmentVariable("WAYLAND_DISPLAY");
-            string x11Display = Environment.GetEnvironmentVariable("DISPLAY");
+            _ = AssetDirectories.Root;
 
-            if (!string.IsNullOrEmpty(waylandDisplay))
+            glfw.WindowHint(WindowHintInt.ContextVersionMajor, 3);
+            glfw.WindowHint(WindowHintInt.ContextVersionMinor, 3);
+            glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.OpenGL);
+            glfw.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core);
+
+            window = glfw.CreateWindow(900, 800, "Nova Engine", null, null);
+
+            if (window == null)
             {
-                Console.WriteLine($"Using Wayland display: {waylandDisplay}");
-                Environment.SetEnvironmentVariable("XDG_SESSION_TYPE", "wayland");
-                Environment.SetEnvironmentVariable("GDK_BACKEND", "wayland");
+                Console.WriteLine("Failed to create window");
+                return;
             }
-            else if (!string.IsNullOrEmpty(x11Display))
+
+            glfw.MakeContextCurrent(window);
+
+            GContext._GL = GL.GetApi(glfw.GetProcAddress);
+
+            var gl = GContext._GL;
+
+            glfw.SetFramebufferSizeCallback(window, (wnd, width, height) =>
             {
-                Console.WriteLine($"Using X11 display: {x11Display}");
-                Environment.SetEnvironmentVariable("XDG_SESSION_TYPE", "x11");
-                Environment.SetEnvironmentVariable("GDK_BACKEND", "x11");
-            }
-            else
+                gl.Viewport(0, 0, (uint)width, (uint)height);
+            });
+
+            glfw.SetWindowOpacity(window, 0.95f);
+
+            Input.Init(window, glfw);
+
+            ITextureLoader<Texture2D> textureLoader = new Texture2DLoader();
+
+            var _baseMap = textureLoader.Load(TextureType.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
+            var _normalMap = textureLoader.Load(TextureType.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
+            var _metallicMap = textureLoader.Load(TextureType.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
+
+            var mat = new Material(textureLoader);
+
+            mat.Textures.Set(0, _baseMap);
+            mat.Textures.Set(1, _normalMap);
+            mat.Textures.Set(2, _metallicMap);
+            mat.Color = new Vector4(1, 1, 1, 1);
+
+            var cube = new Material(textureLoader);
+            cube.Color = new Vector4(1, 1, 1, 1);
+
+            IGraphicRenderer rendering = new OpenGLRenderer(textureLoader);
+
+            rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
+            rendering.AddObject(AssetDirectories.Models + "/cube.obj", cube);
+
+            rendering.InitializeObjects();
+
+            while (!glfw.WindowShouldClose(window))
             {
-                Console.WriteLine("No display found, defaulting to X11");
-                Environment.SetEnvironmentVariable("DISPLAY", ":1");
-                Environment.SetEnvironmentVariable("XDG_SESSION_TYPE", "x11");
-                Environment.SetEnvironmentVariable("GDK_BACKEND", "x11");
+                glfw.PollEvents();
+
+                rendering.Render(window); 
             }
+
+            rendering.Dispose();
+
+            glfw.DestroyWindow(window);
+            glfw.Terminate();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    static void SetupDisplayBackend()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Console.WriteLine("Running on Windows - no display setup needed");
+            return;
         }
 
+        string waylandDisplay = Environment.GetEnvironmentVariable("WAYLAND_DISPLAY");
+        string x11Display = Environment.GetEnvironmentVariable("DISPLAY");
 
+        if (!string.IsNullOrEmpty(waylandDisplay))
+        {
+            Console.WriteLine($"Using Wayland display: {waylandDisplay}");
+            Environment.SetEnvironmentVariable("XDG_SESSION_TYPE", "wayland");
+            Environment.SetEnvironmentVariable("GDK_BACKEND", "wayland");
+        }
+        else if (!string.IsNullOrEmpty(x11Display))
+        {
+            Console.WriteLine($"Using X11 display: {x11Display}");
+            Environment.SetEnvironmentVariable("XDG_SESSION_TYPE", "x11");
+            Environment.SetEnvironmentVariable("GDK_BACKEND", "x11");
+        }
+        else
+        {
+            Console.WriteLine("No display found, defaulting to X11");
+            Environment.SetEnvironmentVariable("DISPLAY", ":1");
+            Environment.SetEnvironmentVariable("XDG_SESSION_TYPE", "x11");
+            Environment.SetEnvironmentVariable("GDK_BACKEND", "x11");
+        }
     }
 }
