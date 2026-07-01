@@ -12,7 +12,7 @@ public unsafe struct UnsafeList<T> : IUnsafeMap<T>, IDisposable where T : unmana
     {
         Length = 0;
         Capacity = capacity;
-        Data = (T*)Marshal.AllocHGlobal(sizeof(T) * Capacity);
+        Data = (T*)NativeMemory.Alloc((nuint)(sizeof(T) * capacity));
 
         new Span<T>(Data, Capacity).Clear();
     }
@@ -51,14 +51,14 @@ public unsafe struct UnsafeList<T> : IUnsafeMap<T>, IDisposable where T : unmana
 
     private void Resize(int newCapacity)
     {
-        T* newData = (T*)Marshal.AllocHGlobal(sizeof(T) * newCapacity);
+        T* newData = (T*)NativeMemory.Alloc((nuint)(sizeof(T) * newCapacity));
 
         Buffer.MemoryCopy(
             Data, newData,
             newCapacity * sizeof(T),
             Length * sizeof(T));
 
-        Marshal.FreeHGlobal((IntPtr)Data);
+        NativeMemory.Free(Data);
 
         Data = newData;
         Capacity = newCapacity;
@@ -94,7 +94,7 @@ public unsafe struct UnsafeList<T> : IUnsafeMap<T>, IDisposable where T : unmana
     {
         if (Data != null)
         {
-            Marshal.FreeHGlobal((IntPtr)Data);
+            NativeMemory.Free(Data);
             Data = null;
         }
     }
