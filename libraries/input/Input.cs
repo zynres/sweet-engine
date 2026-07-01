@@ -1,6 +1,5 @@
 using System.Numerics;
 using Silk.NET.GLFW;
-using static Silk.NET.GLFW.GlfwCallbacks;
 
 namespace input;
 
@@ -14,11 +13,8 @@ public unsafe static class Input
 
     private static Vector2 _lastMousePosition;
 
-    private static double lastX;
-    private static double lastY;
-
-    private static int width;
-    private static int height;
+    public static int Width;
+    public static int Height;
 
     public static void Init(WindowHandle* _window, Glfw _glfw)
     {
@@ -27,28 +23,35 @@ public unsafe static class Input
 
         glfw.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal);
 
+        UpdateWindowSize();
+
+        SetMousePosition(new Vector2(Width / 2, Height / 2));
+    }
+
+    private static void UpdateWindowSize()
+    {
         glfw.GetWindowSize(window, out int _width, out int _height);
 
-        SetMousePosition(new Vector2(width / 2, height / 2));
-
-        width = _width;
-        height = _height;
+        Width = _width;
+        Height = _height;
     }
 
     public static void Update(bool isMouseRight)
     {
+        UpdateWindowSize();
+
         glfw.GetCursorPos(window, out double x, out double y);
 
-        if (isMouseRight && (x < 0 || x > width || y < 0 || y > height))
+        if (isMouseRight && (x < 0 || x > Width || y < 0 || y > Height))
         {
             if (x < 0)
-                x = width;
-            if (x > width)
+                x = Width;
+            if (x > Width)
                 x = 0;
 
             if (y < 0)
-                y = height;
-            if (y > height)
+                y = Height;
+            if (y > Height)
                 y = 0;
 
             glfw.SetCursorPos(window, x, y);
