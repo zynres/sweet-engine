@@ -9,36 +9,46 @@ namespace Nova;
 public unsafe struct OpenGLRenderer : IGraphicRenderer
 {
     public ShaderSetter _ShaderSetter;
-    public Transform CameraTransform;
 
+    public CameraController _CameraController;
     public UnsafeList<ObjectData> ObjectDatas;
+
+    public IGuiRenderer GuiRenderer;
+
+    public Dictionary<string, IMeshLoader> MeshLoaders;
 
     public bool IsLineRender { get; set; }
 
     private bool isBinding { get; set; }
 
-    public OpenGLRenderer()
+    public OpenGLRenderer(ITextureLoader<Texture2D> textureLoader)
     {
-        CameraTransform = new()
-        {
-            Position = new(0, 0, 20),
-            Rotation = new(0, 0, 0)
-        };
-
         IsLineRender = IsLineRender = false;
 
-        _ShaderSetter = new ShaderSetter(new Shader());
+        GuiRenderer = new ImGuiRenderer(textureLoader);
 
+        var shader = new Shader();
+
+        _ShaderSetter = new ShaderSetter(shader.vertexSrc, shader.fragmentSrc);
+        
+        _CameraController = new CameraController();
         ObjectDatas = new UnsafeList<ObjectData>(100);
 
+        MeshLoaders = new(1)
+        {
+            [".obj"] = new ObjLoader()
+        };
+
         isBinding = false;
+
+        //GContext._GL.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
     }
 
     public void AddObject(string path, Material mat)
     {
         var gl = GContext._GL;
 
-        var mesh = MeshLoader.Load(path);
+        var mesh = MeshLoaders[Path.GetExtension(path)].Load(path);
 
         uint _vao = gl.GenVertexArray();
         uint _vbo = gl.GenBuffer();
@@ -48,12 +58,16 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
 
         // Vertex buffer
         gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
-        gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(mesh.Vertices.Length * sizeof(float)), mesh.Vertices.Data, BufferUsageARB.StaticDraw);
+        gl.BufferData(
+            BufferTargetARB.ArrayBuffer, (nuint)(mesh.Vertices.Length * sizeof(float)),
+            mesh.Vertices.Data, BufferUsageARB.StaticDraw);
 
 
         // Index buffer       
         gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
-        gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(mesh.Indices.Length * sizeof(uint)), mesh.Indices.Data, BufferUsageARB.StaticDraw);
+        gl.BufferData(
+            BufferTargetARB.ElementArrayBuffer, (nuint)(mesh.Indices.Length * sizeof(uint)),
+            mesh.Indices.Data, BufferUsageARB.StaticDraw);
 
         uint stride = 11 * sizeof(float);
 
@@ -77,8 +91,8 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
 
         gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
 
-        int modelLocation = gl.GetUniformLocation(_ShaderSetter.Handle, "uModel");
-        int mvpLocation = gl.GetUniformLocation(_ShaderSetter.Handle, "uMVP");
+        int modelLocation = gl.GetUniformLocation(_ShaderSetter.Id, "uModel");
+        int mvpLocation = gl.GetUniformLocation(_ShaderSetter.Id, "uMVP");
 
         gl.FrontFace(FrontFaceDirection.Ccw);
         gl.Enable(EnableCap.DepthTest);
@@ -133,8 +147,6 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
     }
 
     private float lastTime;
-    private float speed;
-    private float sensitivity;
 
     public void Render(WindowHandle* window)
     {
@@ -146,65 +158,23 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
 
         LineRenderMode();
 
-        gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
-        gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-
         float currentTime = (float)glfw.GetTime();
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
-        bool isMouseRight = false;
+        GuiRenderer.Update(deltaTime);
 
-        if (Input.GetKeyMouse(MouseButton.Right))
-        {
-            isMouseRight = true;
-            Vector3 vector = Vector3.Zero;
+        gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
+        gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
 
-            Vector3 forward = CameraTransform.GetForward();
-            Vector3 right = CameraTransform.GetRight();
-            Vector3 up = CameraTransform.GetUp();
+        _ShaderSetter.Use();
 
-            if (Input.GetKey(Keys.W))
-                vector += forward;
-            if (Input.GetKey(Keys.S))
-                vector -= forward;
-            if (Input.GetKey(Keys.A))
-                vector -= right;
-            if (Input.GetKey(Keys.D))
-                vector += right;
+        _CameraController.Handle(deltaTime);
 
-            if (Input.GetKey(Keys.Q))
-                vector -= up;
-            if (Input.GetKey(Keys.E))
-                vector += up;
-
-            if (Input.GetKey(Keys.ShiftLeft))
-                speed += 0.1f;
-            else
-                speed = 25f;
-
-            sensitivity = 3;
-
-            CameraTransform.Rotation.Y += Input.MouseDelta.X * sensitivity * deltaTime;
-            CameraTransform.Rotation.X += Input.MouseDelta.Y * sensitivity * deltaTime;
-
-            CameraTransform.Rotation.X = Math.Clamp(
-                CameraTransform.Rotation.X,
-                -MathF.PI / 2 + 0.01f,
-                MathF.PI / 2 - 0.01f);
-
-            if (vector != Vector3.Zero)
-                vector = Vector3.Normalize(vector);
-
-            CameraTransform.Position += vector * speed * deltaTime;
-        }
-
-        Input.Update(isMouseRight);
-
-        Matrix4x4 view = Matrix4x4.CreateLookAt(CameraTransform.Position, CameraTransform.Position + CameraTransform.GetForward(), Vector3.UnitY);
+        Matrix4x4 view = Matrix4x4.CreateLookAt(_CameraController.Transform->Position, _CameraController.Transform->Position + _CameraController.Transform->GetForward(), Vector3.UnitY);
         Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, 900f / 800f, 0.1f, 200f);
 
-        _ShaderSetter.SetVector3("uViewPos", CameraTransform.Position);
+        _ShaderSetter.SetVector3("uViewPos", _CameraController.Transform->Position);
 
         for (int i = 0; i < ObjectDatas.Length; i++)
         {
@@ -225,31 +195,35 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
             {
                 if (isBinding)
                 {
-                    _object->Renderer.material.BaseMap.UnBind(TextureUnit.Texture0);
-                    _object->Renderer.material.NormalMap.UnBind(TextureUnit.Texture1);
-                    _object->Renderer.material.MetallicMap.UnBind(TextureUnit.Texture2);
+                    _object->Renderer.material.UnBind();
 
                     isBinding = false;
                 }
 
-                gl.DrawElements(PrimitiveType.Lines, (uint)_object->Renderer.lineIndices.Length, DrawElementsType.UnsignedInt, (void*)0);
+                gl.DrawElements(
+                    PrimitiveType.Lines,
+                    (uint)_object->Renderer.lineIndices.Length,
+                    DrawElementsType.UnsignedInt,
+                    (void*)0);
             }
             else
             {
                 if (!isBinding)
-                {
-                    _object->Renderer.material.BaseMap.Bind(TextureUnit.Texture0);
-                    _object->Renderer.material.NormalMap.Bind(TextureUnit.Texture1);
-                    _object->Renderer.material.MetallicMap.Bind(TextureUnit.Texture2);
-
                     isBinding = true;
-                }
 
-                gl.DrawElements(PrimitiveType.Triangles, (uint)_object->Renderer.mesh.Indices.Length, DrawElementsType.UnsignedInt, (void*)0);
+                _object->Renderer.material.Bind();
+
+                gl.DrawElements(
+                    PrimitiveType.Triangles,
+                    (uint)_object->Renderer.mesh.Indices.Length,
+                    DrawElementsType.UnsignedInt,
+                    (void*)0);
             }
         }
 
-        gl.BindVertexArray(0);
+        GuiRenderer.Render();
+
+        //gl.BindVertexArray(0);
         glfw.SwapBuffers(window);
     }
     
@@ -291,6 +265,8 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
 
             _object->Dispose();
         }
+
+        _CameraController.Dispose();
 
         ObjectDatas.Dispose();
         _ShaderSetter.Dispose();
