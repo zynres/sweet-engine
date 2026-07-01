@@ -13,7 +13,7 @@ public unsafe struct UnsafeArray<T> : IUnsafeMap<T>, IDisposable where T : unman
     {    
         Length = 0;
         Capacity = capasity;
-        Data = (T*)Marshal.AllocHGlobal(sizeof(T) * capasity);
+        Data = (T*)NativeMemory.Alloc((nuint)(sizeof(T) * capasity));
 
         new Span<T>(Data, capasity).Clear();
     }
@@ -56,7 +56,7 @@ public unsafe struct UnsafeArray<T> : IUnsafeMap<T>, IDisposable where T : unman
     {
         if (Data != null)
         {
-            Marshal.FreeHGlobal((IntPtr)Data);
+            NativeMemory.Free(Data);
             Data = null;
         }
     }
