@@ -10,13 +10,13 @@ public unsafe struct Material : IDisposable
 
     public UnsafeArray<Texture2D> Textures;
 
-    public Material(ITextureLoader<Texture2D>* loader)
+    public Material(ITextureLoader<Texture2D> loader)
     {
         Textures = new UnsafeArray<Texture2D>(3);
 
-        Textures.Set(0, loader->SetDefault(TextureType.BaseMap));
-        Textures.Set(1, loader->SetDefault(TextureType.NormalMap));
-        Textures.Set(2, loader->SetDefault(TextureType.MetallicMap));
+        Textures.Set(0, loader.SetDefault(TextureType.BaseMap));
+        Textures.Set(1, loader.SetDefault(TextureType.NormalMap));
+        Textures.Set(2, loader.SetDefault(TextureType.MetallicMap));
     }
 
     public readonly void Bind()
