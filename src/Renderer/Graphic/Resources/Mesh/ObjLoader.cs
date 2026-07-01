@@ -4,9 +4,9 @@ using unsafe_maps.maps;
 
 namespace Nova
 {
-    public unsafe struct MeshLoader
+    public unsafe struct ObjLoader : IMeshLoader
     {
-        public static Mesh Load(string path)
+        public Mesh Load(string path)
         {
             var lines = File.ReadAllLines(path);
 
