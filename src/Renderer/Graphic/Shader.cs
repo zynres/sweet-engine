@@ -1,9 +1,9 @@
 
-namespace Nova
+namespace Nova;
+
+public struct Shader()
 {
-    public struct Shader()
-    {
-        public string vertexSrc = @"
+    public string vertexSrc = @"
         #version 330 core
 
         layout (location = 0) in vec3 aPos;
@@ -29,7 +29,7 @@ namespace Nova
             vec3 B = cross(N, T);
             TBN = mat3(T, B, N);
         }";
-        public string fragmentSrc = @"
+    public string fragmentSrc = @"
         #version 330 core
 
         in vec2 TexCoords;
@@ -75,5 +75,4 @@ namespace Nova
 
             FragColor = vec4(finalColor, baseColor.a);
         }";
-    }
 }
