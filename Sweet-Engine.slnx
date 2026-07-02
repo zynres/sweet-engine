@@ -1,5 +1,6 @@
 <Solution> 
-	<Project Path="src\Source.csproj" />
+	<Project Path="src/Source.csproj" />
+	
 	<Project Path="libraries/input/input.csproj" />
 	<Project Path="libraries/unsafe-maps/unsafe-maps.csproj" />
 </Solution>
