@@ -1,6 +1,6 @@
 [submodule "libraries/unsafe-maps"]
 	path = libraries/unsafe-maps
-	url = https://github.com/Woolction/unsafe-maps.git
+	url = https://github.com/zynres/unsafe-maps.git
 [submodule "libraries/input"]
 	path = libraries/input
-	url = https://github.com/Woolction/input.git
+	url = https://github.com/zynres/input.git
