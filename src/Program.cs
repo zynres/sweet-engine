@@ -16,9 +16,9 @@ unsafe class Program
         {
             SetupDisplayBackend();
 
-            GContext._Glfw = Glfw.GetApi();
+            GraphicStack._Glfw = Glfw.GetApi();
 
-            var glfw = GContext._Glfw;
+            var glfw = GraphicStack._Glfw;
 
             if (!glfw.Init())
             {
@@ -33,7 +33,7 @@ unsafe class Program
             glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.OpenGL);
             glfw.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core);
 
-            window = glfw.CreateWindow(900, 800, "Nova Engine", null, null);
+            window = glfw.CreateWindow(1060, 640, "Sweet Engine", null, null);
 
             if (window == null)
             {
@@ -43,20 +43,11 @@ unsafe class Program
 
             glfw.MakeContextCurrent(window);
 
-            GContext._GL = GL.GetApi(glfw.GetProcAddress);
+            GraphicStack._GL = GL.GetApi(glfw.GetProcAddress);
 
-            var gl = GContext._GL;
+            var gl = GraphicStack._GL;
 
-            glfw.SetFramebufferSizeCallback(window, (wnd, width, height) =>
-            {
-                gl.Viewport(0, 0, (uint)width, (uint)height);
-            });
-
-            glfw.SetWindowOpacity(window, 0.95f);
-
-            Input.Init(window, glfw);
-
-            ITextureLoader<Texture2D> textureLoader = new Texture2DLoader();
+            Texture2DLoader textureLoader = new Texture2DLoader();
 
             var _baseMap = textureLoader.Load(TextureType.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
             var _normalMap = textureLoader.Load(TextureType.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
@@ -72,7 +63,75 @@ unsafe class Program
             var cube = new Material(textureLoader);
             cube.Color = new Vector4(1, 1, 1, 1);
 
-            IGraphicRenderer rendering = new OpenGLRenderer(textureLoader);
+            OpenGLRenderer rendering = new OpenGLRenderer(textureLoader);
+
+            bool isAspect = true;
+
+            float w = 1060f;
+            float h = 640f;
+
+            glfw.SetFramebufferSizeCallback(window, (wnd, width, height) =>
+            {
+                if (isAspect)
+                {
+                    w = width;
+                    h = height;
+
+                    gl.Viewport(0, 0, (uint)width, (uint)height);
+                }
+                else
+                {
+                    w = 1920f; h = 1080f;
+                    
+                    float targetAspect = w / h;
+                    float windowAspect = (float)width / height;
+
+                    int vpX, vpY, vpW, vpH;
+
+                    if (windowAspect > targetAspect)
+                    {
+                        vpH = height;
+                        vpW = (int)(height * targetAspect);
+                        vpX = (width - vpW) / 2;
+                        vpY = 0;
+                    }
+                    else
+                    {
+                        vpW = width;
+                        vpH = (int)(width / targetAspect);
+                        vpX = 0;
+                        vpY = (height - vpH) / 2;
+                    }
+
+                    gl.Viewport(vpX, vpY, (uint)vpW, (uint)vpH);
+                }
+
+                rendering._CameraController.Aspect = w / h;
+            });
+
+            rendering._CameraController.Aspect = w / h;
+
+            glfw.SetWindowOpacity(window, 1f);
+
+            Input.Init(window, glfw);
+
+            /*ITextureLoader<Texture2D> textureLoader = new Texture2DLoader();
+
+            var _baseMap = textureLoader.Load(TextureType.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
+            var _normalMap = textureLoader.Load(TextureType.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
+            var _metallicMap = textureLoader.Load(TextureType.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
+
+            var mat = new Material(textureLoader);
+
+            mat.Textures.Set(0, _baseMap);
+            mat.Textures.Set(1, _normalMap);
+            mat.Textures.Set(2, _metallicMap);
+            mat.Color = new Vector4(1, 1, 1, 1);
+
+            var cube = new Material(textureLoader);
+            cube.Color = new Vector4(1, 1, 1, 1);
+
+            IGraphicRenderer rendering = new OpenGLRenderer(textureLoader);*/
 
             rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
             rendering.AddObject(AssetDirectories.Models + "/cube.obj", cube);
@@ -83,7 +142,7 @@ unsafe class Program
             {
                 glfw.PollEvents();
 
-                rendering.Render(window); 
+                rendering.Render(window);
             }
 
             rendering.Dispose();

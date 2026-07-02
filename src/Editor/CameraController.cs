@@ -9,6 +9,7 @@ public unsafe struct CameraController : IDisposable
 {
     public Transform* Transform;
 
+    public float Aspect;
     private float sensitivity;
     private float speed;
 
