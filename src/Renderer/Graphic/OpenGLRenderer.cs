@@ -2,26 +2,26 @@ using System.Numerics;
 using input;
 using Silk.NET.GLFW;
 using Silk.NET.OpenGL;
-using unsafe_maps.maps;
+using unsafe_maps.src;
 
 namespace Nova;
 
-public unsafe struct OpenGLRenderer : IGraphicRenderer
+public unsafe struct OpenGLRenderer
 {
     public ShaderSetter _ShaderSetter;
 
     public CameraController _CameraController;
     public UnsafeList<ObjectData> ObjectDatas;
 
-    public IGuiRenderer GuiRenderer;
+    public ImGuiRenderer GuiRenderer;
 
-    public Dictionary<string, IMeshLoader> MeshLoaders;
+    public Dictionary<string, ObjLoader> MeshLoaders;
 
     public bool IsLineRender { get; set; }
 
     private bool isBinding { get; set; }
 
-    public OpenGLRenderer(ITextureLoader<Texture2D> textureLoader)
+    public OpenGLRenderer(Texture2DLoader textureLoader)
     {
         IsLineRender = IsLineRender = false;
 
@@ -30,7 +30,7 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
         var shader = new Shader();
 
         _ShaderSetter = new ShaderSetter(shader.vertexSrc, shader.fragmentSrc);
-        
+
         _CameraController = new CameraController();
         ObjectDatas = new UnsafeList<ObjectData>(100);
 
@@ -41,12 +41,12 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
 
         isBinding = false;
 
-        //GContext._GL.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
+        //GraphicStack._GL.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
     }
 
     public void AddObject(string path, Material mat)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         var mesh = MeshLoaders[Path.GetExtension(path)].Load(path);
 
@@ -150,11 +150,8 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
 
     public void Render(WindowHandle* window)
     {
-        var gl = GContext._GL;
-        var glfw = GContext._Glfw;
-
-        if (gl == null || glfw == null)
-            return;
+        var gl = GraphicStack._GL;
+        var glfw = GraphicStack._Glfw;
 
         LineRenderMode();
 
@@ -162,18 +159,17 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
-        GuiRenderer.Update(deltaTime);
+        GuiRenderer.Update(window, deltaTime);
 
         gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
         gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
 
-        _ShaderSetter.Use();
-
         _CameraController.Handle(deltaTime);
 
         Matrix4x4 view = Matrix4x4.CreateLookAt(_CameraController.Transform->Position, _CameraController.Transform->Position + _CameraController.Transform->GetForward(), Vector3.UnitY);
-        Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, 900f / 800f, 0.1f, 200f);
+        Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, _CameraController.Aspect, 0.1f, 1000f);
 
+        _ShaderSetter.Use();
         _ShaderSetter.SetVector3("uViewPos", _CameraController.Transform->Position);
 
         for (int i = 0; i < ObjectDatas.Length; i++)
@@ -223,10 +219,10 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
 
         GuiRenderer.Render();
 
-        //gl.BindVertexArray(0);
+        gl.BindVertexArray(0);
         glfw.SwapBuffers(window);
     }
-    
+
     private void LineRenderMode()
     {
         if (Input.GetKeyDown(Keys.Number1))
@@ -251,7 +247,7 @@ public unsafe struct OpenGLRenderer : IGraphicRenderer
 
     public void Dispose()
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         if (gl == null)
             return;

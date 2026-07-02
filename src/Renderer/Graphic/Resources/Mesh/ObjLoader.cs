@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Numerics;
-using unsafe_maps.maps;
+using unsafe_maps.src;
 
 namespace Nova
 {
-    public unsafe struct ObjLoader : IMeshLoader
+    public unsafe struct ObjLoader 
     {
         public Mesh Load(string path)
         {

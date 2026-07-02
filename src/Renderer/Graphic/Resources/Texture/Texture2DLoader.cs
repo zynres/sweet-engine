@@ -3,7 +3,7 @@ using StbImageSharp;
 
 namespace Nova;
 
-public struct Texture2DLoader : ITextureLoader<Texture2D>
+public struct Texture2DLoader
 {
     private readonly Dictionary<TextureType, uint> default_maps;
     private readonly Dictionary<TextureType, TextureUnit> units;
@@ -26,7 +26,7 @@ public struct Texture2DLoader : ITextureLoader<Texture2D>
 
     public readonly Texture2D Load(TextureType format, string path)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         TextureUnit unit = units[format];
 
@@ -71,7 +71,7 @@ public struct Texture2DLoader : ITextureLoader<Texture2D>
 
     public readonly Texture2D Load(TextureType format, ReadOnlySpan<byte> pixels, int width, int height)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         TextureUnit unit = units[format];
 
@@ -116,14 +116,14 @@ public struct Texture2DLoader : ITextureLoader<Texture2D>
     {
         var id = default_maps[format];
 
-        GContext._GL?.BindTexture(GLEnum.Texture2D, id);
+        GraphicStack._GL?.BindTexture(GLEnum.Texture2D, id);
 
         return new Texture2D(id, 1, 1, units[format]);
     }
 
     private readonly uint CreateDefaultTexture(TextureType TextureType)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         uint tex = gl.GenTexture();
         gl.BindTexture(TextureTarget.Texture2D, tex);
