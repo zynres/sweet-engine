@@ -3,7 +3,7 @@ using Silk.NET.OpenGL;
 
 namespace Nova;
 
-public static class GContext
+public static class GraphicStack
 {
     public static GL _GL;
     public static Glfw _Glfw;

@@ -9,7 +9,7 @@ public struct ShaderSetter : IDisposable
 
     public ShaderSetter(string vertexSrc, string fragmentSrc)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         uint vertex = gl.CreateShader(ShaderType.VertexShader);
         gl.ShaderSource(vertex, vertexSrc);
@@ -34,14 +34,13 @@ public struct ShaderSetter : IDisposable
 
         Console.WriteLine($"Program = {Id}");
         gl.GetProgram(Id, ProgramPropertyARB.LinkStatus, out int linked);
-        Console.WriteLine(linked);
     }
 
-    public void Use() => GContext._GL.UseProgram(Id);
+    public void Use() => GraphicStack._GL.UseProgram(Id);
 
     public void SetInt(string name, int value)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         int loc = gl.GetUniformLocation(Id, name);
         gl.Uniform1(loc, value);
@@ -51,7 +50,7 @@ public struct ShaderSetter : IDisposable
 
     public void SetFloat(string name, float value)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         int loc = gl.GetUniformLocation(Id, name);
         gl.Uniform1(loc, value);
@@ -61,7 +60,7 @@ public struct ShaderSetter : IDisposable
 
     public void SetVector4(string name, Vector4 vec)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         int loc = gl.GetUniformLocation(Id, name);
         gl.Uniform4(loc, vec.X, vec.Y, vec.Z, vec.W);
@@ -71,7 +70,7 @@ public struct ShaderSetter : IDisposable
 
     public void SetVector3(string name, Vector3 vec)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         int loc = gl.GetUniformLocation(Id, name);
         gl.Uniform3(loc, vec.X, vec.Y, vec.Z);
@@ -81,7 +80,7 @@ public struct ShaderSetter : IDisposable
 
     public void SetMatrix4(string name, Matrix4x4 mat, bool transpose = false)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         int loc = gl.GetUniformLocation(Id, name);
 
@@ -95,17 +94,17 @@ public struct ShaderSetter : IDisposable
 
     private void CheckCurrentProgram(GL gl, string name, int loc)
     {
-       /* Console.WriteLine($"{name} -> {loc}");
+        /* Console.WriteLine($"{name} -> {loc}");
 
-        int currentProgram;
-        gl.GetInteger(GetPName.CurrentProgram, out currentProgram);
+         int currentProgram;
+         gl.GetInteger(GetPName.CurrentProgram, out currentProgram);
 
-        Console.WriteLine($"Current = {currentProgram}, Expected = {Id}");*/
+         Console.WriteLine($"Current = {currentProgram}, Expected = {Id}");*/
     }
 
     private void CheckCompileErrors(uint shader, string type)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         gl.GetShader(shader, ShaderParameterName.CompileStatus, out int status);
         if (status == 0)
@@ -117,7 +116,7 @@ public struct ShaderSetter : IDisposable
 
     private void CheckLinkErrors(uint program)
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         gl.GetProgram(program, ProgramPropertyARB.LinkStatus, out int status);
         if (status == 0)
@@ -129,7 +128,7 @@ public struct ShaderSetter : IDisposable
 
     public void Dispose()
     {
-        var gl = GContext._GL;
+        var gl = GraphicStack._GL;
 
         if (Id != 0)
         {

@@ -2,7 +2,7 @@ using Silk.NET.GLFW;
 
 namespace Nova;
 
-public unsafe struct VulkanRenderer : IGraphicRenderer
+public unsafe struct VulkanRenderer
 {
     public void AddObject(string path, Material mat)
     {
