@@ -1,4 +1,4 @@
-using unsafe_maps.src;
+using Sweet.Collections.Unsafe.List;
 using ImGuiNET;
 
 namespace Nova;
@@ -23,8 +23,8 @@ public unsafe struct DockSpace : IDisposable
     {
         ImGui.DockSpaceOverViewport(ImGui.GetID("main_dock_space"), ImGui.GetMainViewport());
 
-        for (int i = 0; i < Windows.Length; i++)
-            Windows[i]->Draw();
+        for (uint i = 0; i < Windows.Length; i++)
+            Windows[i].Draw();
     }
 
     public void Dispose()

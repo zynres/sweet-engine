@@ -1,8 +1,8 @@
+using Sweet.Collections.Unsafe.List;
 using System.Numerics;
-using input;
-using Silk.NET.GLFW;
 using Silk.NET.OpenGL;
-using unsafe_maps.src;
+using Silk.NET.GLFW;
+using input;
 
 namespace Nova;
 
@@ -116,7 +116,7 @@ public unsafe struct OpenGLRenderer
             },
             Renderer = new MeshRenderer()
             {
-                lineIndices = MeshUtils.GenerateUniqueEdges(mesh.Indices),
+                lineIndices = MeshUtils.GenerateUniqueEdges(in mesh.Indices),
                 material = mat,
                 mesh = mesh,
                 vao = _vao,
@@ -133,16 +133,16 @@ public unsafe struct OpenGLRenderer
         _ShaderSetter.SetVector3("uLightDir", new Vector3(0f, 1f, 1f));
         _ShaderSetter.SetFloat("uLightIntensity", 2f);
 
-        for (int i = 0; i < ObjectDatas.Length; i++)
+        for (uint i = 0; i < ObjectDatas.Length; i++)
         {
-            ObjectData* _object = ObjectDatas[i];
+            ref ObjectData _object = ref ObjectDatas[i];
 
             if (i == 0)
-                _object->Transform.Scale = new Vector3(0.25f, 0.25f, 0.25f);
+                _object.Transform.Scale = new Vector3(0.25f, 0.25f, 0.25f);
             else
-                _object->Transform.Scale = new Vector3(1f, 1f, 1f);
+                _object.Transform.Scale = new Vector3(1f, 1f, 1f);
 
-            _object->Transform.Position.Y = 10 * i;
+            _object.Transform.Position.Y = 10 * i;
         }
     }
 
@@ -172,33 +172,33 @@ public unsafe struct OpenGLRenderer
         _ShaderSetter.Use();
         _ShaderSetter.SetVector3("uViewPos", _CameraController.Transform->Position);
 
-        for (int i = 0; i < ObjectDatas.Length; i++)
+        for (uint i = 0; i < ObjectDatas.Length; i++)
         {
-            ObjectData* _object = ObjectDatas[i];
+            ref ObjectData _object = ref ObjectDatas[i];
 
-            _object->Transform.Rotation.Y = currentTime / 2;
+            _object.Transform.Rotation.Y = currentTime / 2;
 
-            Matrix4x4 model = _object->Transform.LocalToWorldMatrix;
+            Matrix4x4 model = _object.Transform.LocalToWorldMatrix;
 
             Matrix4x4 mvp = model * view * proj;
 
             _ShaderSetter.SetMatrix4("uMVP", mvp);
             _ShaderSetter.SetMatrix4("uModel", model);
 
-            gl.BindVertexArray(_object->Renderer.vao);
+            gl.BindVertexArray(_object.Renderer.vao);
 
             if (IsLineRender)
             {
                 if (isBinding)
                 {
-                    _object->Renderer.material.UnBind();
+                    _object.Renderer.material.UnBind();
 
                     isBinding = false;
                 }
 
                 gl.DrawElements(
                     PrimitiveType.Lines,
-                    (uint)_object->Renderer.lineIndices.Length,
+                    _object.Renderer.lineIndices.Length,
                     DrawElementsType.UnsignedInt,
                     (void*)0);
             }
@@ -207,11 +207,11 @@ public unsafe struct OpenGLRenderer
                 if (!isBinding)
                     isBinding = true;
 
-                _object->Renderer.material.Bind();
+                _object.Renderer.material.Bind();
 
                 gl.DrawElements(
                     PrimitiveType.Triangles,
-                    (uint)_object->Renderer.mesh.Indices.Length,
+                    _object.Renderer.mesh.Indices.Length,
                     DrawElementsType.UnsignedInt,
                     (void*)0);
             }
@@ -252,14 +252,14 @@ public unsafe struct OpenGLRenderer
         if (gl == null)
             return;
 
-        for (int i = 0; i < ObjectDatas.Length; i++)
+        for (uint i = 0; i < ObjectDatas.Length; i++)
         {
-            ObjectData* _object = ObjectDatas[i];
+            ref ObjectData _object = ref ObjectDatas[i];
 
-            gl.DeleteBuffer(_object->Renderer.vbo);
-            gl.DeleteVertexArray(_object->Renderer.vao);
+            gl.DeleteBuffer(_object.Renderer.vbo);
+            gl.DeleteVertexArray(_object.Renderer.vao);
 
-            _object->Dispose();
+            _object.Dispose();
         }
 
         _CameraController.Dispose();

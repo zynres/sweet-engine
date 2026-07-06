@@ -1,39 +1,43 @@
-using unsafe_maps.src;
+using Sweet.Collections.Unsafe.HashSet;
+using Sweet.Collections.Unsafe.Array;
 
 namespace Nova
 {
     public unsafe struct MeshUtils
     {
-        public static UnsafeArray<uint> GenerateUniqueEdges(UnsafeArray<uint> triangleIndices)
+        public static UnsafeArray<uint> GenerateUniqueEdges(in UnsafeArray<uint> triangleIndices)
         {
-            var edges = new HashSet<(uint, uint)>();
+            var edges = new UnsafeHashSet<(uint, uint)>(triangleIndices.Length * 2);
 
-            for (int i = 0; i < triangleIndices.Length; i += 3)
+            for (uint i = 0; i < triangleIndices.Length; i += 3)
             {
-                uint a = *triangleIndices[i];
-                uint b = *triangleIndices[i + 1];
-                uint c = *triangleIndices[i + 2];
+                uint a = triangleIndices[i];
+                uint b = triangleIndices[i + 1];
+                uint c = triangleIndices[i + 2];
 
-                AddEdge(edges, a, b);
-                AddEdge(edges, b, c);
-                AddEdge(edges, c, a);
+                AddEdge(ref edges, a, b);
+                AddEdge(ref edges, b, c);
+                AddEdge(ref edges, c, a);
             }
 
-            var indices = new UnsafeArray<uint>(edges.Count * 2);
+            var indices = new UnsafeArray<uint>(edges.Length * 2);
 
-            int index = 0;
-            foreach (var (a, b) in edges)
+            uint index = 0;
+
+            for (uint i = 0; i < edges.Length; i++)
             {
-                *indices[index++] = a;
-                *indices[index++] = b;
-            }
+                var (a, b) = edges[i];
 
-            indices.SetLength(index + 1);
+                indices.Set(index++, a);
+                indices.Set(index++, b);
+            }
+            
+            edges.Dispose();
 
             return indices;
         }
 
-        private static void AddEdge(HashSet<(uint, uint)> edges, uint v1, uint v2)
+        private static void AddEdge(ref UnsafeHashSet<(uint, uint)> edges, uint v1, uint v2)
         {
             if (v1 < v2)
                 edges.Add((v1, v2));

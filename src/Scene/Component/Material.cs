@@ -1,6 +1,6 @@
+using Sweet.Collections.Unsafe.Array;
 using System.Numerics;
 using Silk.NET.OpenGL;
-using unsafe_maps.src;
 
 namespace Nova;
 
@@ -23,12 +23,12 @@ public unsafe struct Material : IDisposable
     {
         var gl = GraphicStack._GL;
 
-        for (int i = 0; i < Textures.Length; i++)
+        for (uint i = 0; i < Textures.Length; i++)
         {
-            Texture2D* texture = Textures[i];
+            Texture2D texture = Textures[i];
 
-            gl.ActiveTexture(texture->Unit);
-            gl.BindTexture(TextureTarget.Texture2D, texture->Id);
+            gl.ActiveTexture(texture.Unit);
+            gl.BindTexture(TextureTarget.Texture2D, texture.Id);
         }
     }
 
@@ -36,11 +36,11 @@ public unsafe struct Material : IDisposable
     {
         var gl = GraphicStack._GL;
 
-        for (int i = 0; i < Textures.Length; i++)
+        for (uint i = 0; i < Textures.Length; i++)
         {
-            Texture2D* texture = Textures[i];
+            Texture2D texture = Textures[i];
 
-            gl.ActiveTexture(texture->Unit);
+            gl.ActiveTexture(texture.Unit);
             gl.BindTexture(TextureTarget.Texture2D, 0);
         }
     }

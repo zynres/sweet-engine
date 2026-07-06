@@ -143,6 +143,8 @@ unsafe class Program
                 glfw.PollEvents();
 
                 rendering.Render(window);
+
+                Thread.Sleep(6);
             }
 
             rendering.Dispose();

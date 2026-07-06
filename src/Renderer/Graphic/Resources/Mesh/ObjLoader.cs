@@ -1,6 +1,7 @@
+using Sweet.Collections.Unsafe.Array;
+using Sweet.Collections.Unsafe.List;
 using System.Globalization;
 using System.Numerics;
-using unsafe_maps.src;
 
 namespace Nova
 {
@@ -56,11 +57,11 @@ namespace Nova
 
                     if (parts.Length < 3) continue;
 
-                    using var faceIndices = new UnsafeArray<uint>(parts.Length);
+                    using var faceIndices = new UnsafeArray<uint>((uint)parts.Length);
 
-                    for (int j = 0; j < parts.Length; j++)
+                    for (uint j = 0; j < parts.Length; j++)
                     {
-                        var idx = parts[j].Split('/');
+                        var idx = parts[(int)j].Split('/');
 
                         int vIndex = int.Parse(idx[0]) - 1;
                         int tIndex = (idx.Length > 1 && idx[1] != "") ? int.Parse(idx[1]) - 1 : -1;
@@ -70,9 +71,9 @@ namespace Nova
 
                         if (!vertexMap.TryGetValue(key, out uint index))
                         {
-                            var pos = *positions[vIndex];
-                            var uv = (tIndex >= 0 && tIndex < uvs.Length) ? *uvs[tIndex] : new Vector2();
-                            var norm = (nIndex >= 0 && nIndex < normals.Length) ? *normals[nIndex] : new Vector3();
+                            var pos = positions[(uint)vIndex];
+                            var uv = (tIndex >= 0 && tIndex < uvs.Length) ? uvs[(uint)tIndex] : new Vector2();
+                            var norm = (nIndex >= 0 && nIndex < normals.Length) ? normals[(uint)nIndex] : new Vector3();
 
                             using var values = new UnsafeArray<float>(11);
 
@@ -91,8 +92,6 @@ namespace Nova
                             values.Data[9] = 0;
                             values.Data[10] = 0;
 
-                            values.SetLength(11);
-
                             finalVerts.AddRange(values);
 
                             index = (uint)(finalVerts.Length / 11 - 1);
@@ -106,28 +105,28 @@ namespace Nova
                         faceIndices.Set(j, index);
                     }
 
-                    for (int j = 1; j < faceIndices.Length - 1; j++)
+                    for (uint j = 1; j < faceIndices.Length - 1; j++)
                     {
-                        indices.Add(*faceIndices[0]);
-                        indices.Add(*faceIndices[j]);
-                        indices.Add(*faceIndices[j + 1]);
+                        indices.Add(faceIndices[0]);
+                        indices.Add(faceIndices[j]);
+                        indices.Add(faceIndices[j + 1]);
 
-                        uint i0 = *faceIndices[0];
-                        uint i1 = *faceIndices[j];
-                        uint i2 = *faceIndices[j + 1];
+                        uint i0 = faceIndices[0];
+                        uint i1 = faceIndices[j];
+                        uint i2 = faceIndices[j + 1];
 
-                        Vector3* v0 = vertexPositions[(int)i0];
-                        Vector3* v1 = vertexPositions[(int)i1];
-                        Vector3* v2 = vertexPositions[(int)i2];
+                        Vector3 v0 = vertexPositions[i0];
+                        Vector3 v1 = vertexPositions[i1];
+                        Vector3 v2 = vertexPositions[i2];
 
-                        Vector2* uv0 = vertexUVs[(int)i0];
-                        Vector2* uv1 = vertexUVs[(int)i1];
-                        Vector2* uv2 = vertexUVs[(int)i2];
+                        Vector2 uv0 = vertexUVs[i0];
+                        Vector2 uv1 = vertexUVs[i1];
+                        Vector2 uv2 = vertexUVs[i2];
 
-                        var deltaPos1 = *v1 - *v0;
-                        var deltaPos2 = *v2 - *v0;
-                        var deltaUV1 = *uv1 - *uv0;
-                        var deltaUV2 = *uv2 - *uv0;
+                        var deltaPos1 = v1 - v0;
+                        var deltaPos2 = v2 - v0;
+                        var deltaUV1 = uv1 - uv0;
+                        var deltaUV2 = uv2 - uv0;
 
                         float r = deltaUV1.X * deltaUV2.Y - deltaUV1.Y * deltaUV2.X;
 
@@ -138,22 +137,22 @@ namespace Nova
 
                         Vector3 tangent = (deltaPos1 * deltaUV2.Y - deltaPos2 * deltaUV1.Y) * r;
 
-                        *tan1[(int)i0] += tangent;
-                        *tan1[(int)i1] += tangent;
-                        *tan1[(int)i2] += tangent;
+                        tan1[i0] += tangent;
+                        tan1[i1] += tangent;
+                        tan1[i2] += tangent;
                     }
                 }
             }
 
-            for (int i = 0; i < tan1.Length; i++)
+            for (uint i = 0; i < tan1.Length; i++)
             {
-                Vector3 t = Vector3.Normalize(*tan1[i]);
+                Vector3 t = Vector3.Normalize(tan1[i]);
 
-                int baseIndex = i * 11 + 8;
+                uint baseIndex = i * 11 + 8;
 
-                *finalVerts[baseIndex + 0] = t.X;
-                *finalVerts[baseIndex + 1] = t.Y;
-                *finalVerts[baseIndex + 2] = t.Z;
+                finalVerts[baseIndex + 0] = t.X;
+                finalVerts[baseIndex + 1] = t.Y;
+                finalVerts[baseIndex + 2] = t.Z;
             }
 
             var mesh = new Mesh

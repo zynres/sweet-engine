@@ -23,7 +23,7 @@ public unsafe struct CameraController : IDisposable
             Rotation = Vector3.Zero
         };
 
-        sensitivity = 2;
+        sensitivity = 0.002f;
     }
 
     public void Handle(float deltaTime)
@@ -75,8 +75,8 @@ public unsafe struct CameraController : IDisposable
 
     private void Rotating(float deltaTime)
     {
-        Transform->Rotation.Y += Input.MouseDelta.X * sensitivity * deltaTime;
-        Transform->Rotation.X += Input.MouseDelta.Y * sensitivity * deltaTime;
+        Transform->Rotation.Y += sensitivity * Input.MouseDelta.X;// * deltaTime;
+        Transform->Rotation.X += sensitivity * Input.MouseDelta.Y;// * deltaTime;
 
         Transform->Rotation.X = Math.Clamp(
             Transform->Rotation.X,

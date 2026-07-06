@@ -2,5 +2,5 @@
 	<Project Path="src/Source.csproj" />
 	
 	<Project Path="libraries/input/input.csproj" />
-	<Project Path="libraries/unsafe-maps/unsafe-maps.csproj" />
+	<Project Path="libraries/sweet-collections/src/Sweet.Collections/Sweet.Collections.csproj" />
 </Solution>

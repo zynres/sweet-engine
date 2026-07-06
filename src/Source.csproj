@@ -18,7 +18,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\libraries\unsafe-maps\unsafe-maps.csproj" /> 
+    <ProjectReference Include="..\libraries\sweet-collections\src\Sweet.Collections\Sweet.Collections.csproj" /> 
     <ProjectReference Include="..\libraries\input\input.csproj" /> 
   </ItemGroup>
 </Project>
