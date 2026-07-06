@@ -1,5 +1,7 @@
 <Solution>
-	<Project Path="libraries/input/input.csproj" />
-	<Project Path="libraries/sweet-collections/src/Sweet.Collections/Sweet.Collections.csproj" />
+	<Project Path="libraries/sweet-platform/src/Sweet.Intents/Sweet.Intents.csproj" />
 	<Project Path="src/Sweet.Engine/Sweet.Engine.csproj" />
+
+	<Project Path="libraries/sweet-collections/src/Sweet.Collections/Sweet.Collections.csproj" />
+
 </Solution>

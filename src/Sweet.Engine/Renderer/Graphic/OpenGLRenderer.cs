@@ -8,7 +8,7 @@ using Sweet.Engine.Renderer.Gui;
 using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
-using input;
+using Sweet.Intents;
 
 namespace Sweet.Engine.Renderer.Graphic;
 
@@ -231,7 +231,7 @@ public unsafe struct OpenGLRenderer
 
     private void LineRenderMode()
     {
-        if (Input.GetKeyDown(Keys.Number1))
+        if (Intent.GetKeyDown(Keys.Number1))
         {
             if (IsLineRender)
             {
@@ -240,7 +240,7 @@ public unsafe struct OpenGLRenderer
                 Console.WriteLine($"[Render Mode] => Fill mode");
             }
         }
-        else if (Input.GetKeyDown(Keys.Number2))
+        else if (Intent.GetKeyDown(Keys.Number2))
         {
             if (!IsLineRender)
             {

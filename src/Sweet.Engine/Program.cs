@@ -8,7 +8,7 @@ using Sweet.Engine.Core;
 using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
-using input;
+using Sweet.Intents;
 
 namespace Sweet.Engine;
 
@@ -119,7 +119,7 @@ unsafe class Program
 
             glfw.SetWindowOpacity(window, 1f);
 
-            Input.Init(window, glfw);
+            Intent.Init(window, glfw);
 
             /*ITextureLoader<Texture2D> textureLoader = new Texture2DLoader();
 

@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using Sweet.Engine.Scene.Components;
 using System.Numerics;
 using Silk.NET.GLFW;
-using input;
+using Sweet.Intents;
 
 namespace Sweet.Engine.Editor.Controllers;
 
@@ -31,7 +31,7 @@ public unsafe struct CameraController : IDisposable
     {
         bool isMouseRight = false;
 
-        if (Input.GetKeyMouse(MouseButton.Right))
+        if (Intent.GetKeyMouse(MouseButton.Right))
         {
             isMouseRight = true;
 
@@ -39,7 +39,7 @@ public unsafe struct CameraController : IDisposable
             Rotating(deltaTime);
         }
 
-        Input.Update(isMouseRight);
+        Intent.Update(isMouseRight);
     }
 
     private void Movement(float deltaTime)
@@ -49,21 +49,21 @@ public unsafe struct CameraController : IDisposable
         Vector3 up = Transform->GetUp();
         Vector3 vector = Vector3.Zero;
 
-        if (Input.GetKey(Keys.W))
+        if (Intent.GetKey(Keys.W))
             vector += forward;
-        if (Input.GetKey(Keys.S))
+        if (Intent.GetKey(Keys.S))
             vector -= forward;
-        if (Input.GetKey(Keys.A))
+        if (Intent.GetKey(Keys.A))
             vector -= right;
-        if (Input.GetKey(Keys.D))
+        if (Intent.GetKey(Keys.D))
             vector += right;
 
-        if (Input.GetKey(Keys.Q))
+        if (Intent.GetKey(Keys.Q))
             vector -= up;
-        if (Input.GetKey(Keys.E))
+        if (Intent.GetKey(Keys.E))
             vector += up;
 
-        if (Input.GetKey(Keys.ShiftLeft))
+        if (Intent.GetKey(Keys.ShiftLeft))
             speed += 0.05f;
         else
             speed = 25f;
@@ -76,8 +76,8 @@ public unsafe struct CameraController : IDisposable
 
     private void Rotating(float deltaTime)
     {
-        Transform->Rotation.Y += sensitivity * Input.MouseDelta.X;// * deltaTime;
-        Transform->Rotation.X += sensitivity * Input.MouseDelta.Y;// * deltaTime;
+        Transform->Rotation.Y += sensitivity * Intent.MouseDelta.X;// * deltaTime;
+        Transform->Rotation.X += sensitivity * Intent.MouseDelta.Y;// * deltaTime;
 
         Transform->Rotation.X = Math.Clamp(
             Transform->Rotation.X,

@@ -19,6 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\sweet-collections\src\Sweet.Collections\Sweet.Collections.csproj" /> 
-    <ProjectReference Include="..\..\libraries\input\input.csproj" /> 
+    <ProjectReference Include="..\..\libraries\sweet-platform\src\Sweet.Intents\Sweet.Intents.csproj" /> 
   </ItemGroup>
 </Project>
