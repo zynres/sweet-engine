@@ -1,6 +1,6 @@
-[submodule "libraries/sweet-collections"]
-	path = libraries/sweet-collections
-	url = https://github.com/zynres/sweet-collections.git
-[submodule "libraries/sweet-platform"]
-	path = libraries/sweet-platform
-	url = https://github.com/zynres/sweet-platform.git
+[submodule "libraries/sweetlib-platform"]
+	path = libraries/sweetlib-platform
+	url = https://github.com/zynres/sweetlib-platform.git
+[submodule "libraries/sweetlib-collections"]
+	path = libraries/sweetlib-collections
+	url = https://github.com/zynres/sweetlib-collections.git
