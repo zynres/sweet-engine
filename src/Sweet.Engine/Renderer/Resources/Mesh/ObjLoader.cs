@@ -1,10 +1,12 @@
+// Copyright © 2026 Zynres.
+// Licensed under the Apache-2.0 License.
+
 using Sweet.Collections.Unsafe.Array;
 using Sweet.Collections.Unsafe.List;
 using Sweet.Engine.Scene.Components;
 using System.Globalization;
 using System.Diagnostics;
 using System.Numerics;
-using System.ComponentModel;
 
 namespace Sweet.Engine.Renderer.Resources.Mesh;
 

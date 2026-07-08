@@ -1,3 +1,6 @@
+// Copyright © 2026 Zynres.
+// Licensed under the Apache-2.0 License.
+
 using Sweet.Engine.Scene.Components;
 using Silk.NET.GLFW;
 

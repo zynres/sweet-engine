@@ -1,7 +1,11 @@
-﻿using Sweet.Engine.Renderer.Resources.Texture;
+﻿// Copyright © 2026 Zynres.
+// Licensed under the Apache-2.0 License.
+
+using Sweet.Engine.Renderer.Resources.Texture;
 using System.Runtime.InteropServices;
 using Sweet.Engine.Scene.Components;
 using Sweet.Engine.Renderer.Graphic;
+using Sweet.Intents.Generated;
 using Sweet.Engine.Renderer;
 using Sweet.Engine.Enums;
 using Sweet.Engine.Core;
@@ -9,7 +13,6 @@ using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
 using Sweet.Intents;
-using Sweet.Intents.Generated;
 using Sweet.Devices;
 
 namespace Sweet.Engine;
@@ -24,9 +27,9 @@ unsafe class Program
         {
             SetupDisplayBackend();
 
-            GraphicStack._Glfw = Glfw.GetApi();
+            GraphicStack.SetGlfw(Glfw.GetApi());
 
-            var glfw = GraphicStack._Glfw;
+            var glfw = GraphicStack.Glfw;
 
             if (!glfw.Init())
             {
@@ -51,9 +54,9 @@ unsafe class Program
 
             glfw.MakeContextCurrent(window);
 
-            GraphicStack._GL = GL.GetApi(glfw.GetProcAddress);
+            GraphicStack.SetGL(GL.GetApi(glfw.GetProcAddress));
 
-            var gl = GraphicStack._GL;
+            var gl = GraphicStack.GL;
 
             Texture2DLoader textureLoader = new Texture2DLoader();
 

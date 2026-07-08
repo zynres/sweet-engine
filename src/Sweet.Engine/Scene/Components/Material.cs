@@ -24,7 +24,7 @@ public unsafe struct Material : IDisposable
 
     public readonly void Bind()
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         for (uint i = 0; i < Textures.Length; i++)
         {
@@ -37,7 +37,7 @@ public unsafe struct Material : IDisposable
 
     public readonly void UnBind()
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         for (uint i = 0; i < Textures.Length; i++)
         {

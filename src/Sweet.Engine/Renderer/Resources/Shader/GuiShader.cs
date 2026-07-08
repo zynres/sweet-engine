@@ -1,4 +1,3 @@
-
 namespace Sweet.Engine.Renderer.Resources.Shader;
 
 public struct GuiShader()

@@ -1,3 +1,6 @@
+// Copyright © 2026 Zynres.
+// Licensed under the Apache-2.0 License.
+
 using Sweet.Engine.Renderer.Resources.Texture;
 using Sweet.Engine.Renderer.Resources.Shader;
 using Sweet.Engine.Scene.Components;
@@ -7,8 +10,8 @@ using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
 using Sweet.Intents;
-using ImGuiNET;
 using Sweet.Devices;
+using ImGuiNET;
 
 namespace Sweet.Engine.Renderer.Gui;
 
@@ -17,7 +20,7 @@ public unsafe struct ImGuiRenderer
     public ShaderSetter _ShaderSetter;
     private Texture2D _fontTexture;
 
-    private DockSpace dockSpace;
+    private readonly DockSpace dockSpace;
 
     private uint _vao;
     private uint _vbo;
@@ -54,7 +57,7 @@ public unsafe struct ImGuiRenderer
 
     public void Render()
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         _ShaderSetter.Use();
 
@@ -92,7 +95,7 @@ public unsafe struct ImGuiRenderer
 
     private void RenderDrawData(ImDrawDataPtr drawData)
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         if (drawData.NativePtr == null)
             return;
@@ -167,7 +170,7 @@ public unsafe struct ImGuiRenderer
         io.AddKeyEvent(ImGuiKey.S, Intent.IsPressed(Keys.S));
         io.AddKeyEvent(ImGuiKey.D, Intent.IsPressed(Keys.D));
 
-        GraphicStack._Glfw.SetCharCallback(window, (wnd, codepoint) =>
+        GraphicStack.Glfw.SetCharCallback(window, (wnd, codepoint) =>
         {
             io.AddInputCharacter(codepoint);
         });
@@ -192,7 +195,7 @@ public unsafe struct ImGuiRenderer
 
     private void SetupBuffers()
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         _vao = gl.GenVertexArray();
         _vbo = gl.GenBuffer();

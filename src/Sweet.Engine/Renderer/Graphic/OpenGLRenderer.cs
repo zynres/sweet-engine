@@ -1,3 +1,6 @@
+// Copyright © 2026 Zynres.
+// Licensed under the Apache-2.0 License.
+
 using Sweet.Engine.Renderer.Resources.Texture;
 using Sweet.Engine.Renderer.Resources.Shader;
 using Sweet.Engine.Renderer.Resources.Mesh;
@@ -47,12 +50,12 @@ public unsafe struct OpenGLRenderer
 
         isBinding = false;
 
-        //GraphicStack._GL.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
+        //GraphicStack.GL.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
     }
 
     public void AddObject(string path, Material mat)
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         var mesh = MeshLoaders[Path.GetExtension(path)].Load(path);
 
@@ -156,8 +159,8 @@ public unsafe struct OpenGLRenderer
 
     public void Render(WindowHandle* window)
     {
-        var gl = GraphicStack._GL;
-        var glfw = GraphicStack._Glfw;
+        var gl = GraphicStack.GL;
+        var glfw = GraphicStack.Glfw;
 
         LineRenderMode();
 
@@ -253,7 +256,7 @@ public unsafe struct OpenGLRenderer
 
     public void Dispose()
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         if (gl == null)
             return;

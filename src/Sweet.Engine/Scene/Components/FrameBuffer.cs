@@ -14,7 +14,7 @@ public struct FrameBuffer
 
     public void Bind()
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         gl.ActiveTexture(Texture.Unit);
         gl.BindTexture(TextureTarget.Texture2D, Texture.Id);
@@ -22,7 +22,7 @@ public struct FrameBuffer
 
     public void UnBind()
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         gl.ActiveTexture(Texture.Unit);
         gl.BindTexture(TextureTarget.Texture2D, 0);

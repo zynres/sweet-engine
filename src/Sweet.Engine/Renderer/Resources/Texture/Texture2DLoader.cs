@@ -1,3 +1,6 @@
+// Copyright © 2026 Zynres.
+// Licensed under the Apache-2.0 License.
+
 using Sweet.Engine.Scene.Components;
 using Sweet.Engine.Enums;
 using Silk.NET.OpenGL;
@@ -28,7 +31,7 @@ public struct Texture2DLoader
 
     public readonly Texture2D Load(TextureType format, string path)
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         TextureUnit unit = units[format];
 
@@ -73,7 +76,7 @@ public struct Texture2DLoader
 
     public readonly Texture2D Load(TextureType format, ReadOnlySpan<byte> pixels, int width, int height)
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         TextureUnit unit = units[format];
 
@@ -118,14 +121,14 @@ public struct Texture2DLoader
     {
         var id = default_maps[format];
 
-        GraphicStack._GL?.BindTexture(GLEnum.Texture2D, id);
+        GraphicStack.GL?.BindTexture(GLEnum.Texture2D, id);
 
         return new Texture2D(id, 1, 1, units[format]);
     }
 
     private readonly uint CreateDefaultTexture(TextureType TextureType)
     {
-        var gl = GraphicStack._GL;
+        var gl = GraphicStack.GL;
 
         uint tex = gl.GenTexture();
         gl.BindTexture(TextureTarget.Texture2D, tex);
