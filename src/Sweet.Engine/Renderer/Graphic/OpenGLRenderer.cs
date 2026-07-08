@@ -231,7 +231,7 @@ public unsafe struct OpenGLRenderer
 
     private void LineRenderMode()
     {
-        if (Intent.GetKeyDown(Keys.Number1))
+        if (Intent.IsDown(Keys.Number1))
         {
             if (IsLineRender)
             {
@@ -240,7 +240,7 @@ public unsafe struct OpenGLRenderer
                 Console.WriteLine($"[Render Mode] => Fill mode");
             }
         }
-        else if (Intent.GetKeyDown(Keys.Number2))
+        else if (Intent.IsDown(Keys.Number2))
         {
             if (!IsLineRender)
             {

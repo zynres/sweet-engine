@@ -9,6 +9,8 @@ using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
 using Sweet.Intents;
+using Sweet.Intents.Generated;
+using Sweet.Devices;
 
 namespace Sweet.Engine;
 
@@ -119,6 +121,7 @@ unsafe class Program
 
             glfw.SetWindowOpacity(window, 1f);
 
+            Device.Init(window, glfw);
             Intent.Init(window, glfw);
 
             /*ITextureLoader<Texture2D> textureLoader = new Texture2DLoader();
@@ -150,8 +153,16 @@ unsafe class Program
 
                 rendering.Render(window);
 
+                if (Intent.IsDown(EditorCameraIntents.Sprint))
+                {
+
+                }
+
                 Thread.Sleep(6);
             }
+
+            Device.Dispose();
+            Intent.Dispose();
 
             rendering.Dispose();
 

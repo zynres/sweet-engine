@@ -8,6 +8,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
 using Sweet.Intents;
 using ImGuiNET;
+using Sweet.Devices;
 
 namespace Sweet.Engine.Renderer.Gui;
 
@@ -69,8 +70,8 @@ public unsafe struct ImGuiRenderer
         _ShaderSetter.SetInt("uTexture", 0);
 
         Matrix4x4 ortho = Matrix4x4.CreateOrthographicOffCenter(
-            0, Intent.Width,
-            Intent.Height, 0,
+            0, Device.Window->Size.X,
+            Device.Window->Size.Y, 0,
             -1, 1
         );
 
@@ -127,7 +128,7 @@ public unsafe struct ImGuiRenderer
 
                 gl.Scissor(
                     (int)clip.X,
-                    (int)(Intent.Height - clip.W),
+                    (int)(Device.Window->Size.Y - clip.W),
                     (uint)(clip.Z - clip.X),
                     (uint)(clip.W - clip.Y)
                 );
@@ -150,21 +151,21 @@ public unsafe struct ImGuiRenderer
         ImGuiIOPtr io = ImGui.GetIO();
 
         io.DeltaTime = deltaTime;
-        io.DisplaySize = new Vector2(Intent.Width, Intent.Height);
+        io.DisplaySize = new Vector2(Device.Window->Size.X, Device.Window->Size.Y);
         io.DisplayFramebufferScale = new Vector2(1f, 1f);
 
-        io.AddMousePosEvent(Intent.MousePosition.X, Intent.MousePosition.Y);
+        io.AddMousePosEvent(Device.Mouse->Position.X, Device.Mouse->Position.Y);
 
-        io.AddMouseButtonEvent(0, Intent.GetKeyMouse(MouseButton.Left));
-        io.AddMouseButtonEvent(1, Intent.GetKeyMouse(MouseButton.Right));
-        io.AddMouseButtonEvent(2, Intent.GetKeyMouse(MouseButton.Middle));
+        io.AddMouseButtonEvent(0, Intent.IsMouse(MouseButton.Left));
+        io.AddMouseButtonEvent(1, Intent.IsMouse(MouseButton.Right));
+        io.AddMouseButtonEvent(2, Intent.IsMouse(MouseButton.Middle));
 
-        io.AddKeyEvent(ImGuiKey.Delete, Intent.GetKey(Keys.Delete));
-        io.AddKeyEvent(ImGuiKey.Space, Intent.GetKey(Keys.Space));
-        io.AddKeyEvent(ImGuiKey.A, Intent.GetKey(Keys.A));
-        io.AddKeyEvent(ImGuiKey.W, Intent.GetKey(Keys.W));
-        io.AddKeyEvent(ImGuiKey.S, Intent.GetKey(Keys.S));
-        io.AddKeyEvent(ImGuiKey.D, Intent.GetKey(Keys.D));
+        io.AddKeyEvent(ImGuiKey.Delete, Intent.IsPressed(Keys.Delete));
+        io.AddKeyEvent(ImGuiKey.Space, Intent.IsPressed(Keys.Space));
+        io.AddKeyEvent(ImGuiKey.A, Intent.IsPressed(Keys.A));
+        io.AddKeyEvent(ImGuiKey.W, Intent.IsPressed(Keys.W));
+        io.AddKeyEvent(ImGuiKey.S, Intent.IsPressed(Keys.S));
+        io.AddKeyEvent(ImGuiKey.D, Intent.IsPressed(Keys.D));
 
         GraphicStack._Glfw.SetCharCallback(window, (wnd, codepoint) =>
         {
