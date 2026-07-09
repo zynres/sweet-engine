@@ -12,6 +12,7 @@ using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
 using Sweet.Intents;
+using Sweet.Devices;
 
 namespace Sweet.Engine.Renderer.Graphic;
 
@@ -164,16 +165,14 @@ public unsafe struct OpenGLRenderer
 
         LineRenderMode();
 
-        float currentTime = (float)glfw.GetTime();
-        float deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
+        Device.Update();
 
-        GuiRenderer.Update(window, deltaTime);
+        GuiRenderer.Update(window, Device.Time->Delta);
 
         gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
         gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
 
-        _CameraController.Handle(deltaTime);
+        _CameraController.Handle(Device.Time->Delta);
 
         Matrix4x4 view = Matrix4x4.CreateLookAt(_CameraController.Transform->Position, _CameraController.Transform->Position + _CameraController.Transform->GetForward(), Vector3.UnitY);
         Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, _CameraController.Aspect, 0.1f, 1000f);
@@ -185,7 +184,7 @@ public unsafe struct OpenGLRenderer
         {
             ref EntityData _object = ref EntityDatas[i];
 
-            _object.Transform.Rotation.Y = currentTime / 2;
+            _object.Transform.Rotation.Y = Device.Time->Current / 2;
 
             Matrix4x4 model = _object.Transform.LocalToWorldMatrix;
 
@@ -234,7 +233,7 @@ public unsafe struct OpenGLRenderer
 
     private void LineRenderMode()
     {
-        if (Intent.IsDown(Keys.Number1))
+        if (Intent.IsHeld(Keys.Number1))
         {
             if (IsLineRender)
             {
@@ -243,7 +242,7 @@ public unsafe struct OpenGLRenderer
                 Console.WriteLine($"[Render Mode] => Fill mode");
             }
         }
-        else if (Intent.IsDown(Keys.Number2))
+        else if (Intent.IsHeld(Keys.Number2))
         {
             if (!IsLineRender)
             {

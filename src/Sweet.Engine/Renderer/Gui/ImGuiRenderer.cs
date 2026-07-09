@@ -159,16 +159,16 @@ public unsafe struct ImGuiRenderer
 
         io.AddMousePosEvent(Device.Mouse->Position.X, Device.Mouse->Position.Y);
 
-        io.AddMouseButtonEvent(0, Intent.IsMouse(MouseButton.Left));
-        io.AddMouseButtonEvent(1, Intent.IsMouse(MouseButton.Right));
-        io.AddMouseButtonEvent(2, Intent.IsMouse(MouseButton.Middle));
+        io.AddMouseButtonEvent(0, Intent.IsHeld(MouseButton.Left));
+        io.AddMouseButtonEvent(1, Intent.IsHeld(MouseButton.Right));
+        io.AddMouseButtonEvent(2, Intent.IsHeld(MouseButton.Middle));
 
-        io.AddKeyEvent(ImGuiKey.Delete, Intent.IsPressed(Keys.Delete));
-        io.AddKeyEvent(ImGuiKey.Space, Intent.IsPressed(Keys.Space));
-        io.AddKeyEvent(ImGuiKey.A, Intent.IsPressed(Keys.A));
-        io.AddKeyEvent(ImGuiKey.W, Intent.IsPressed(Keys.W));
-        io.AddKeyEvent(ImGuiKey.S, Intent.IsPressed(Keys.S));
-        io.AddKeyEvent(ImGuiKey.D, Intent.IsPressed(Keys.D));
+        io.AddKeyEvent(ImGuiKey.Delete, Intent.IsHeld(Keys.Delete));
+        io.AddKeyEvent(ImGuiKey.Space, Intent.IsHeld(Keys.Space));
+        io.AddKeyEvent(ImGuiKey.A, Intent.IsHeld(Keys.A));
+        io.AddKeyEvent(ImGuiKey.W, Intent.IsHeld(Keys.W));
+        io.AddKeyEvent(ImGuiKey.S, Intent.IsHeld(Keys.S));
+        io.AddKeyEvent(ImGuiKey.D, Intent.IsHeld(Keys.D));
 
         GraphicStack.Glfw.SetCharCallback(window, (wnd, codepoint) =>
         {

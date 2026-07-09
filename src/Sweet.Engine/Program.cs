@@ -156,11 +156,7 @@ unsafe class Program
 
                 rendering.Render(window);
 
-                if (Intent.IsDown(EditorCameraIntents.Sprint))
-                {
-
-                }
-
+                Intent.KickBackInvoke();
                 Thread.Sleep(6);
             }
 

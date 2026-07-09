@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Sweet.Engine.Scene.Components;
+using Sweet.Intents.Generated;
 using System.Numerics;
 using Silk.NET.GLFW;
 using Sweet.Intents;
@@ -11,9 +12,11 @@ public unsafe struct CameraController : IDisposable
 {
     public Transform* Transform;
 
+    private readonly float speedMultiplier;
+    private readonly float sensitivity;
+    private readonly float speed;
+
     public float Aspect;
-    private float sensitivity;
-    private float speed;
 
     public CameraController()
     {
@@ -25,60 +28,41 @@ public unsafe struct CameraController : IDisposable
             Rotation = Vector3.Zero
         };
 
+        speedMultiplier = 1.01f;
         sensitivity = 0.002f;
+        speed = 25f;
     }
 
     public void Handle(float deltaTime)
     {
-        bool isMouseRight = false;
-
-        if (Intent.IsMouse(MouseButton.Right))
+        if (Intent.IsHeld(EditorCameraIntents.MoveState))
         {
-            isMouseRight = true;
-
             Movement(deltaTime);
             Rotating(deltaTime);
         }
-
-        Device.Update(isMouseRight);
     }
 
     private void Movement(float deltaTime)
     {
-        Vector3 forward = Transform->GetForward();
-        Vector3 right = Transform->GetRight();
-        Vector3 up = Transform->GetUp();
-        Vector3 vector = Vector3.Zero;
+        Vector3 direction =
+            Transform->GetForward() * Intent.GetAxis(EditorCameraIntents.MoveForward) +
+            Transform->GetRight() * Intent.GetAxis(EditorCameraIntents.MoveRight) +
+            Transform->GetUp() * Intent.GetAxis(EditorCameraIntents.MoveUp);
 
-        if (Intent.IsPressed(Keys.W))
-            vector += forward;
-        if (Intent.IsPressed(Keys.S))
-            vector -= forward;
-        if (Intent.IsPressed(Keys.A))
-            vector -= right;
-        if (Intent.IsPressed(Keys.D))
-            vector += right;
+        float currentSpeed = Intent.IsHeld(EditorCameraIntents.Sprint) ?
+            speed * speedMultiplier :
+            speed;
 
-        if (Intent.IsPressed(Keys.Q))
-            vector -= up;
-        if (Intent.IsPressed(Keys.E))
-            vector += up;
+        if (direction != Vector3.Zero)
+            direction = Vector3.Normalize(direction);
 
-        if (Intent.IsPressed(Keys.ShiftLeft))
-            speed += 0.05f;
-        else
-            speed = 25f;
-
-        if (vector != Vector3.Zero)
-            vector = Vector3.Normalize(vector);
-
-        Transform->Position += vector * speed * deltaTime;
+        Transform->Position += direction * currentSpeed * deltaTime;
     }
 
     private void Rotating(float deltaTime)
     {
-        Transform->Rotation.Y += sensitivity * Device.Mouse->Delta.X;// * deltaTime;
-        Transform->Rotation.X += sensitivity * Device.Mouse->Delta.Y;// * deltaTime;
+        Transform->Rotation.Y += sensitivity * Device.Mouse->Delta.X;
+        Transform->Rotation.X += sensitivity * Device.Mouse->Delta.Y;
 
         Transform->Rotation.X = Math.Clamp(
             Transform->Rotation.X,
