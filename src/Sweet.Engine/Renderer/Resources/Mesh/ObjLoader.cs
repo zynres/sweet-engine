@@ -17,10 +17,6 @@ public unsafe struct ObjLoader
         Stopwatch stopwatch = new();
         stopwatch.Start();
 
-        var lines = File.ReadAllLines(path);
-
-        Console.WriteLine(lines.Length);
-
         using UnsafeList<Vector3> positions = new(128);
         using UnsafeList<Vector3> normals = new(128);
         using UnsafeList<Vector2> uvs = new(128);
@@ -33,7 +29,7 @@ public unsafe struct ObjLoader
         using UnsafeList<Vector2> vertexUVs = new(128);
         using UnsafeList<Vector3> tan1 = new(128);
 
-        foreach (var line in lines)
+        foreach (var line in File.ReadLines(path))
         {
             if (line.StartsWith("v "))
             {
@@ -104,7 +100,7 @@ public unsafe struct ObjLoader
 
                         finalVerts.AddRange(values);
 
-                        index = (uint)(finalVerts.Length / 11 - 1);
+                        index = finalVerts.Length / 11 - 1;
                         vertexMap[key] = index;
 
                         vertexPositions.Add(pos);
