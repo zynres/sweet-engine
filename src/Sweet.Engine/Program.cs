@@ -3,9 +3,8 @@
 
 using Sweet.Engine.Renderer.Resources.Texture;
 using System.Runtime.InteropServices;
-using Sweet.Engine.Scene.Components;
 using Sweet.Engine.Renderer.Graphic;
-using Sweet.Intents.Generated;
+using Sweet.Engine.Scene.Components;
 using Sweet.Engine.Renderer;
 using Sweet.Engine.Enums;
 using Sweet.Engine.Core;
@@ -14,6 +13,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
 using Sweet.Intents;
 using Sweet.Devices;
+using System.Diagnostics;
 
 namespace Sweet.Engine;
 
@@ -60,92 +60,30 @@ unsafe class Program
 
             Texture2DLoader textureLoader = new Texture2DLoader();
 
-            var _baseMap = textureLoader.Load(TextureType.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
+            /*var _baseMap = textureLoader.Load(TextureType.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
             var _normalMap = textureLoader.Load(TextureType.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
             var _metallicMap = textureLoader.Load(TextureType.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
 
-            var mat = new Material(textureLoader);
+            /*Material* mat = (Material*)NativeMemory.Alloc((nuint)sizeof(Material));
+            *mat = new Material(in textureLoader);
 
-            mat.Textures.Set(0, _baseMap);
-            mat.Textures.Set(1, _normalMap);
-            mat.Textures.Set(2, _metallicMap);
-            mat.Color = new Vector4(1, 1, 1, 1);
+            mat->Textures.Set(0, _baseMap);
+            mat->Textures.Set(1, _normalMap);
+            mat->Textures.Set(2, _metallicMap);
+            mat->Color = new Vector4(1, 1, 1, 1);*/
 
-            var cube = new Material(textureLoader);
-            cube.Color = new Vector4(1, 1, 1, 1);
+            Material* cube = (Material*)NativeMemory.Alloc((nuint)sizeof(Material));
+            *cube = new Material(in textureLoader);
+            cube->Color = new Vector4(1, 1, 1, 1);
 
             OpenGLRenderer rendering = new OpenGLRenderer(textureLoader);
-
-            bool isAspect = true;
-
-            float w = 1060f;
-            float h = 640f;
-
-            glfw.SetFramebufferSizeCallback(window, (wnd, width, height) =>
-            {
-                if (isAspect)
-                {
-                    w = width;
-                    h = height;
-
-                    gl.Viewport(0, 0, (uint)width, (uint)height);
-                }
-                else
-                {
-                    w = 1920f; h = 1080f;
-
-                    float targetAspect = w / h;
-                    float windowAspect = (float)width / height;
-
-                    int vpX, vpY, vpW, vpH;
-
-                    if (windowAspect > targetAspect)
-                    {
-                        vpH = height;
-                        vpW = (int)(height * targetAspect);
-                        vpX = (width - vpW) / 2;
-                        vpY = 0;
-                    }
-                    else
-                    {
-                        vpW = width;
-                        vpH = (int)(width / targetAspect);
-                        vpX = 0;
-                        vpY = (height - vpH) / 2;
-                    }
-
-                    gl.Viewport(vpX, vpY, (uint)vpW, (uint)vpH);
-                }
-
-                rendering._CameraController.Aspect = w / h;
-            });
-
-            rendering._CameraController.Aspect = w / h;
 
             glfw.SetWindowOpacity(window, 1f);
 
             Device.Init(window, glfw);
             Intent.Init(window, glfw);
 
-            /*ITextureLoader<Texture2D> textureLoader = new Texture2DLoader();
-
-            var _baseMap = textureLoader.Load(TextureType.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
-            var _normalMap = textureLoader.Load(TextureType.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
-            var _metallicMap = textureLoader.Load(TextureType.MetallicMap, AssetDirectories.Textures + "/sakuya-Metallic.png");
-
-            var mat = new Material(textureLoader);
-
-            mat.Textures.Set(0, _baseMap);
-            mat.Textures.Set(1, _normalMap);
-            mat.Textures.Set(2, _metallicMap);
-            mat.Color = new Vector4(1, 1, 1, 1);
-
-            var cube = new Material(textureLoader);
-            cube.Color = new Vector4(1, 1, 1, 1);
-
-            IGraphicRenderer rendering = new OpenGLRenderer(textureLoader);*/
-
-            rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
+            //rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
             rendering.AddObject(AssetDirectories.Models + "/cube.obj", cube);
 
             rendering.InitializeObjects();
