@@ -11,9 +11,11 @@ public unsafe struct Material : IDisposable
 {
     public Vector4 Color;
 
+    public bool IsFree;
+
     public UnsafeArray<Texture2D> Textures;
 
-    public Material(Texture2DLoader loader)
+    public Material(in Texture2DLoader loader)
     {
         Textures = new UnsafeArray<Texture2D>(3);
 
