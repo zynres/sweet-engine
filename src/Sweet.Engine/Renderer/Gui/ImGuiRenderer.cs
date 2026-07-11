@@ -52,7 +52,7 @@ public unsafe struct ImGuiRenderer
 
         ImGui.NewFrame();
 
-        //dockSpace.Draw();
+        dockSpace.Draw();
     }
 
     public void Render()
