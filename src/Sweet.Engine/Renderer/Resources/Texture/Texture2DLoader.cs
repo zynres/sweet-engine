@@ -8,7 +8,7 @@ using StbImageSharp;
 
 namespace Sweet.Engine.Renderer.Resources.Texture;
 
-public struct Texture2DLoader
+public unsafe struct Texture2DLoader
 {
     private readonly Dictionary<TextureType, uint> default_maps;
     private readonly Dictionary<TextureType, TextureUnit> units;
