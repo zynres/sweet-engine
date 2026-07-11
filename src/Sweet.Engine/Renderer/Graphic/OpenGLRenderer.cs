@@ -13,6 +13,9 @@ using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
 using Sweet.Intents;
 using Sweet.Devices;
+using Sweet.Engine.Editor.Window;
+using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace Sweet.Engine.Renderer.Graphic;
 
@@ -20,7 +23,7 @@ public unsafe struct OpenGLRenderer
 {
     public ShaderSetter _ShaderSetter;
 
-    public CameraController _CameraController;
+    public CameraController* _CameraController;
     public UnsafeList<EntityData> EntityDatas;
 
     public ImGuiRenderer GuiRenderer;
@@ -41,7 +44,9 @@ public unsafe struct OpenGLRenderer
 
         _ShaderSetter = new ShaderSetter(shader.vertexSrc, shader.fragmentSrc);
 
-        _CameraController = new CameraController();
+        _CameraController =(CameraController*)NativeMemory.Alloc((nuint)sizeof(CameraController)); 
+        *_CameraController = new CameraController();
+
         EntityDatas = new UnsafeList<EntityData>(100);
 
         MeshLoaders = new(1)
@@ -54,7 +59,7 @@ public unsafe struct OpenGLRenderer
         //GraphicStack.GL.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
     }
 
-    public void AddObject(string path, Material mat)
+    public void AddObject(string path, Material* mat)
     {
         var gl = GraphicStack.GL;
 
@@ -71,7 +76,6 @@ public unsafe struct OpenGLRenderer
         gl.BufferData(
             BufferTargetARB.ArrayBuffer, (nuint)(mesh.Vertices.Length * sizeof(float)),
             mesh.Vertices.Data, BufferUsageARB.StaticDraw);
-
 
         // Index buffer       
         gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
@@ -115,7 +119,7 @@ public unsafe struct OpenGLRenderer
         _ShaderSetter.SetInt("uNormalMap", 1);
         _ShaderSetter.SetInt("uMetallicMap", 2);
 
-        _ShaderSetter.SetVector4("uColor", mat.Color);
+        _ShaderSetter.SetVector4("uColor", mat->Color);
 
         var obj = new EntityData()
         {
@@ -138,25 +142,32 @@ public unsafe struct OpenGLRenderer
         EntityDatas.Add(obj);
     }
 
+    private FrameBuffer* frameBuffer;
+
     public void InitializeObjects()
     {
         _ShaderSetter.SetVector3("uLightDir", new Vector3(0f, 1f, 1f));
         _ShaderSetter.SetFloat("uLightIntensity", 2f);
 
+        frameBuffer = (FrameBuffer*)NativeMemory.Alloc((nuint)sizeof(FrameBuffer)); 
+        *frameBuffer = new FrameBuffer(640, 320);
+
+        SceneWindow.Depends(frameBuffer, _CameraController);
+
         for (uint i = 0; i < EntityDatas.Length; i++)
         {
             ref EntityData _object = ref EntityDatas[i];
 
-            if (i == 0)
-                _object.Transform.Scale = new Vector3(0.25f, 0.25f, 0.25f);
-            else
-                _object.Transform.Scale = new Vector3(1f, 1f, 1f);
+            _object.Transform.Scale = new Vector3(0.25f, 0.25f, 0.25f);
 
-            _object.Transform.Position.Y = 10 * i;
+            _object.Direction = new Vector3(
+                (float)Random.Shared.NextDouble() * 2 - 1, 
+                0, 
+                (float)Random.Shared.NextDouble() * 2 - 1);
+
+            //_object.Transform.Position.Y = 10 * i;
         }
     }
-
-    private float lastTime;
 
     public void Render(WindowHandle* window)
     {
@@ -169,22 +180,26 @@ public unsafe struct OpenGLRenderer
 
         GuiRenderer.Update(window, Device.Time->Delta);
 
+        frameBuffer->Bind();
+
         gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
         gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
 
-        _CameraController.Handle(Device.Time->Delta);
+        _CameraController->Handle(Device.Time->Delta);
 
-        Matrix4x4 view = Matrix4x4.CreateLookAt(_CameraController.Transform->Position, _CameraController.Transform->Position + _CameraController.Transform->GetForward(), Vector3.UnitY);
-        Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, _CameraController.Aspect, 0.1f, 1000f);
+        Matrix4x4 view = Matrix4x4.CreateLookAt(_CameraController->Transform->Position, _CameraController->Transform->Position + _CameraController->Transform->GetForward(), Vector3.UnitY);
+        Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, _CameraController->Aspect, 0.1f, 1000f);
 
         _ShaderSetter.Use();
-        _ShaderSetter.SetVector3("uViewPos", _CameraController.Transform->Position);
+        _ShaderSetter.SetVector3("uViewPos", _CameraController->Transform->Position);
 
         for (uint i = 0; i < EntityDatas.Length; i++)
         {
             ref EntityData _object = ref EntityDatas[i];
 
             _object.Transform.Rotation.Y = Device.Time->Current / 2;
+            
+            _object.Transform.Position += _object.Direction * 2 * Device.Time->Delta;
 
             Matrix4x4 model = _object.Transform.LocalToWorldMatrix;
 
@@ -199,7 +214,7 @@ public unsafe struct OpenGLRenderer
             {
                 if (isBinding)
                 {
-                    _object.Renderer.material.UnBind();
+                    _object.Renderer.material->UnBind();
 
                     isBinding = false;
                 }
@@ -215,7 +230,7 @@ public unsafe struct OpenGLRenderer
                 if (!isBinding)
                     isBinding = true;
 
-                _object.Renderer.material.Bind();
+                _object.Renderer.material->Bind();
 
                 gl.DrawElements(
                     PrimitiveType.Triangles,
@@ -224,6 +239,8 @@ public unsafe struct OpenGLRenderer
                     (void*)0);
             }
         }
+
+        frameBuffer->UnBind();
 
         GuiRenderer.Render();
 
@@ -270,7 +287,11 @@ public unsafe struct OpenGLRenderer
             _object.Dispose();
         }
 
-        _CameraController.Dispose();
+        _CameraController->Dispose();
+        frameBuffer->Dispose();
+
+        NativeMemory.Free(_CameraController);
+        NativeMemory.Free(frameBuffer);
 
         EntityDatas.Dispose();
         _ShaderSetter.Dispose();
