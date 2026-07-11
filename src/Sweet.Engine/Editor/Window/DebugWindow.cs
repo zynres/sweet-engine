@@ -1,14 +1,19 @@
 using ImGuiNET;
+using Silk.NET.Windowing;
+using Sweet.Devices;
+using Sweet.Engine.Renderer;
 
 namespace Sweet.Engine.Editor.Window;
 
-public static class DebugWindow
+public static unsafe class DebugWindow
 {
     public static void DrawImpl()
     {
         ImGui.Begin("Debug");
 
-        ImGui.Text(string.Format("Application average {0:F3} ms/frame ({1:F1} FPS)", 1000f / ImGui.GetIO().Framerate, ImGui.GetIO().Framerate));
+        ImGui.Text($"Application average {1000f / ImGui.GetIO().Framerate:F3} ms/frame ({ImGui.GetIO().Framerate:F1} FPS)");
+        ImGui.Text($"Cursor pos: {Device.Mouse->Position}");
+        ImGui.Text($"Window size: {Device.Window->Size}");
         ImGui.End();
     }
 }
