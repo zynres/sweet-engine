@@ -1,1 +1,0 @@
-namespace Sweet.Engine.Renderer.Resources.Shader;

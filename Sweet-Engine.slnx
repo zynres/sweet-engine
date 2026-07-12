@@ -1,5 +1,5 @@
 <Solution>
-	<Project Path="src/Sweet.Engine/Sweet.Engine.csproj" />
+	<Project Path="src/SweetEngine/SweetEngine.csproj" />
 	
 	<Project Path="libraries/sweetlib-platform/src/Sweet.Intents/Sweet.Intents.csproj" />
 	<Project Path="libraries/sweetlib-platform/src/Sweet.Devices/Sweet.Devices.csproj" />
