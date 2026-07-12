@@ -21,16 +21,21 @@ public unsafe struct ImGuiRenderer
     private Texture2D _fontTexture;
 
     private readonly DockSpace dockSpace;
+    private readonly Glfw glfw;
+    private readonly GL gl;
 
     private uint _vao;
     private uint _vbo;
     private uint _ebo;
 
-    public ImGuiRenderer(Texture2DLoader textureLoader)
+    public ImGuiRenderer(Texture2DLoader textureLoader, GL gl, Glfw glfw)
     {
+        this.glfw = glfw;
+        this.gl = gl;
+
         var guiShader = new GuiShader();
 
-        _ShaderSetter = new ShaderSetter(guiShader.vertexSrc, guiShader.fragmentSrc);
+        _ShaderSetter = new ShaderSetter(gl, guiShader.vertexSrc, guiShader.fragmentSrc);
 
         dockSpace = new DockSpace();
 
@@ -57,8 +62,6 @@ public unsafe struct ImGuiRenderer
 
     public void Render()
     {
-        var gl = GraphicStack.GL;
-
         _ShaderSetter.Use();
 
         gl.Disable(EnableCap.StencilTest);
@@ -95,8 +98,6 @@ public unsafe struct ImGuiRenderer
 
     private void RenderDrawData(ImDrawDataPtr drawData)
     {
-        var gl = GraphicStack.GL;
-
         if (drawData.NativePtr == null)
             return;
 
@@ -170,7 +171,7 @@ public unsafe struct ImGuiRenderer
         io.AddKeyEvent(ImGuiKey.S, Intent.IsHeld(Keys.S));
         io.AddKeyEvent(ImGuiKey.D, Intent.IsHeld(Keys.D));
 
-        GraphicStack.Glfw.SetCharCallback(window, (wnd, codepoint) =>
+        glfw.SetCharCallback(window, (wnd, codepoint) =>
         {
             io.AddInputCharacter(codepoint);
         });
@@ -195,8 +196,6 @@ public unsafe struct ImGuiRenderer
 
     private void SetupBuffers()
     {
-        var gl = GraphicStack.GL;
-
         _vao = gl.GenVertexArray();
         _vbo = gl.GenBuffer();
         _ebo = gl.GenBuffer();
@@ -228,5 +227,10 @@ public unsafe struct ImGuiRenderer
         gl.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, (uint)stride, (void*)16);
 
         gl.BindVertexArray(0);
+    }
+
+    public void Dispose()
+    {
+        _ShaderSetter.Dispose();
     }
 }

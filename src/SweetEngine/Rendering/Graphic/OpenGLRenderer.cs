@@ -30,19 +30,24 @@ public unsafe struct OpenGLRenderer
 
     public Dictionary<string, ObjLoader> MeshLoaders;
 
+    private readonly Glfw glfw;
+    private readonly GL gl;
+
     public bool IsLineRender { get; set; }
 
     private bool isBinding { get; set; }
 
-    public OpenGLRenderer(Texture2DLoader textureLoader)
+    public OpenGLRenderer(Texture2DLoader textureLoader, GL gl, Glfw glfw)
     {
         IsLineRender = IsLineRender = false;
 
-        GuiRenderer = new ImGuiRenderer(textureLoader);
+        GuiRenderer = new ImGuiRenderer(textureLoader, gl, glfw);
+        this.glfw = glfw;
+        this.gl = gl;
 
         var shader = new Library.Resources.Shaders.Shader();
 
-        _ShaderSetter = new ShaderSetter(shader.vertexSrc, shader.fragmentSrc);
+        _ShaderSetter = new ShaderSetter(gl, shader.vertexSrc, shader.fragmentSrc);
 
         _CameraController =(CameraController*)NativeMemory.Alloc((nuint)sizeof(CameraController)); 
         *_CameraController = new CameraController();
@@ -61,8 +66,6 @@ public unsafe struct OpenGLRenderer
 
     public void AddObject(string path, Material* mat)
     {
-        var gl = GraphicStack.GL;
-
         var mesh = MeshLoaders[Path.GetExtension(path)].Load(path);
 
         uint _vao = gl.GenVertexArray();
@@ -133,8 +136,6 @@ public unsafe struct OpenGLRenderer
 
     public void InitializeObjects()
     {
-        var gl = GraphicStack.GL;
-
         gl.FrontFace(FrontFaceDirection.Ccw);
         gl.Enable(EnableCap.DepthTest);
 
@@ -150,7 +151,7 @@ public unsafe struct OpenGLRenderer
         _ShaderSetter.SetFloat("uLightIntensity", 2f);
 
         frameBuffer = (FrameBuffer*)NativeMemory.Alloc((nuint)sizeof(FrameBuffer)); 
-        *frameBuffer = new FrameBuffer(640, 320);
+        *frameBuffer = new FrameBuffer(gl, 640, 320);
 
         SceneWindow.Depends(frameBuffer, _CameraController);
 
@@ -171,16 +172,13 @@ public unsafe struct OpenGLRenderer
 
     public void Render(WindowHandle* window)
     {
-        var gl = GraphicStack.GL;
-        var glfw = GraphicStack.Glfw;
-
         LineRenderMode();
 
         Device.Update();
 
         GuiRenderer.Update(window, Device.Time->Delta);
 
-        frameBuffer->Bind();
+        frameBuffer->Bind(gl);
 
         gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
         gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
@@ -217,7 +215,7 @@ public unsafe struct OpenGLRenderer
             {
                 if (isBinding)
                 {
-                    _object.Renderer.material->UnBind();
+                    _object.Renderer.material->UnBind(gl);
 
                     isBinding = false;
                 }
@@ -233,7 +231,7 @@ public unsafe struct OpenGLRenderer
                 if (!isBinding)
                     isBinding = true;
 
-                _object.Renderer.material->Bind();
+                _object.Renderer.material->Bind(gl);
 
                 gl.DrawElements(
                     PrimitiveType.Triangles,
@@ -243,7 +241,7 @@ public unsafe struct OpenGLRenderer
             }
         }
 
-        frameBuffer->UnBind();
+        frameBuffer->UnBind(gl);
 
         GuiRenderer.Render();
 
@@ -275,10 +273,10 @@ public unsafe struct OpenGLRenderer
 
     public void Dispose()
     {
-        var gl = GraphicStack.GL;
-
         if (gl == null)
             return;
+
+        GuiRenderer.Dispose();
 
         for (uint i = 0; i < EntityDatas.Length; i++)
         {
@@ -291,7 +289,7 @@ public unsafe struct OpenGLRenderer
         }
 
         _CameraController->Dispose();
-        frameBuffer->Dispose();
+        frameBuffer->Dispose(gl);
 
         NativeMemory.Free(_CameraController);
         NativeMemory.Free(frameBuffer);

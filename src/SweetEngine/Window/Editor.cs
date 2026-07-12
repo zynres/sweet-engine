@@ -9,20 +9,21 @@ namespace SweetEngine.Window;
 
 public unsafe struct Editor
 {
-    public GraphicContext Context;
+    public GL GL { get; private set; }
+    public Glfw Glfw { get; private set; }
 
     public void Init()
     {
-        Context = new();
+        
     }
     
     public WindowHandle* CreateWindow(short sizeX, short sizeY)
     {
         SetupDisplayBackend();
 
-        Context.Glfw = Glfw.GetApi();
+        Glfw = Glfw.GetApi();
 
-        var glfw = Context.Glfw;
+        var glfw = Glfw;
 
         if (!glfw.Init())
             throw new Exception("Failed to init GLFW");
@@ -42,7 +43,7 @@ public unsafe struct Editor
         glfw.MakeContextCurrent(window);
         glfw.SetWindowOpacity(window, 1f);
 
-        Context.GL = GL.GetApi(glfw.GetProcAddress);
+        GL = GL.GetApi(glfw.GetProcAddress);
 
         return window;
     }

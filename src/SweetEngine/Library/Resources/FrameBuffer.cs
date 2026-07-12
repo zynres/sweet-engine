@@ -4,7 +4,7 @@ using Sweet.Devices;
 
 namespace SweetEngine.Library.Resources;
 
-public unsafe struct FrameBuffer : IDisposable
+public unsafe struct FrameBuffer
 {
     public uint Id;
     public Texture2D Color;
@@ -15,37 +15,35 @@ public unsafe struct FrameBuffer : IDisposable
     public uint Height;
     public uint X, Y;
 
-    public FrameBuffer(uint width, uint height)
+    public FrameBuffer(GL gl, uint width, uint height)
     {
         Width = width;
         Height = height;
 
-        CreateAttachment();
+        CreateAttachment(gl);
 
     }
 
-    public void Resize(uint x, uint y, uint width, uint height)
+    public void Resize(GL gl, uint x, uint y, uint width, uint height)
     {
         Width = width;
         Height = height;
         X = x;
         Y = y;
 
-        Dispose();
-        CreateAttachment();
+        Dispose(gl);
+        CreateAttachment(gl);
     }
 
-    private void CreateAttachment()
+    private void CreateAttachment(GL gl)
     {
-        var gl = GraphicStack.GL;
-
         // create frame buffer
         gl.GenFramebuffers(1, out uint framebuffer);
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, framebuffer);
         Id = framebuffer;
 
         // create texture
-        Color = new Texture2D(CreateEmptyTexture(Width, Height), (int)Width, (int)Height, TextureUnit.Texture0);
+        Color = new Texture2D(CreateEmptyTexture(gl, Width, Height), (int)Width, (int)Height, TextureUnit.Texture0);
 
         // bind texture to frame buffer
         gl.FramebufferTexture2D(
@@ -76,10 +74,8 @@ public unsafe struct FrameBuffer : IDisposable
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
-    public uint CreateEmptyTexture(uint width, uint height)
+    public uint CreateEmptyTexture(GL gl, uint width, uint height)
     {
-        var gl = GraphicStack.GL;
-
         var tex = gl.GenTexture();
         gl.BindTexture(TextureTarget.Texture2D, tex);
 
@@ -98,26 +94,20 @@ public unsafe struct FrameBuffer : IDisposable
         return tex;
     }
 
-    public void Bind()
+    public void Bind(GL gl)
     {
-        var gl = GraphicStack.GL;
-
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, Id);
         gl.Viewport((int)X, (int)Y, Width, Height);
     }
 
-    public void UnBind()
+    public void UnBind(GL gl)
     {
-        var gl = GraphicStack.GL;
-
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         gl.Viewport(0, 0, (uint)Device.Window->Size.X, (uint)Device.Window->Size.Y);
     }
 
-    public void Dispose()
+    public void Dispose(GL gl)
     {
-        var gl = GraphicStack.GL;
-
         if (Color.Id != 0)
             gl.DeleteTexture(Color.Id);
 

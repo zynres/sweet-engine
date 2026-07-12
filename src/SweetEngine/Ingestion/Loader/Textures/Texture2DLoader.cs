@@ -13,8 +13,13 @@ public unsafe struct Texture2DLoader
 {
     private readonly Dictionary<TextureType, uint> default_maps;
     private readonly Dictionary<TextureType, TextureUnit> units;
-    public Texture2DLoader()
+
+    private readonly GL gl;
+
+    public Texture2DLoader(GL gl)
     {
+        this.gl = gl;
+
         default_maps = new(3)
         {
             [TextureType.BaseMap | TextureType.None] = CreateDefaultTexture(TextureType.BaseMap),
@@ -32,8 +37,6 @@ public unsafe struct Texture2DLoader
 
     public readonly Texture2D Load(TextureType format, string path)
     {
-        var gl = GraphicStack.GL;
-
         TextureUnit unit = units[format];
 
         try
@@ -77,8 +80,6 @@ public unsafe struct Texture2DLoader
 
     public readonly Texture2D Load(TextureType format, ReadOnlySpan<byte> pixels, int width, int height)
     {
-        var gl = GraphicStack.GL;
-
         TextureUnit unit = units[format];
 
         try
@@ -127,8 +128,6 @@ public unsafe struct Texture2DLoader
 
     private readonly uint CreateDefaultTexture(TextureType TextureType)
     {
-        var gl = GraphicStack.GL;
-
         uint tex = gl.GenTexture();
         gl.BindTexture(TextureTarget.Texture2D, tex);
 

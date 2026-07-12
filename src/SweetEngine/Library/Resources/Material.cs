@@ -24,10 +24,8 @@ public unsafe struct Material
         Textures.Set(2, loader.SetDefault(TextureType.MetallicMap));
     }
 
-    public readonly void Bind()
+    public readonly void Bind(GL gl)
     {
-        var gl = GraphicStack.GL;
-
         for (uint i = 0; i < Textures.Length; i++)
         {
             Texture2D texture = Textures[i];
@@ -37,10 +35,8 @@ public unsafe struct Material
         }
     }
 
-    public readonly void UnBind()
+    public readonly void UnBind(GL gl)
     {
-        var gl = GraphicStack.GL;
-
         for (uint i = 0; i < Textures.Length; i++)
         {
             Texture2D texture = Textures[i];
