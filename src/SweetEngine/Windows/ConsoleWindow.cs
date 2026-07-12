@@ -1,10 +1,11 @@
 using ImGuiNET;
+using SweetLib.Devices;
 
-namespace SweetEngine.Window;
+namespace SweetEngine.Windows;
 
 public static class ConsoleWindow
 {
-    public static void DrawImpl()
+    public static void DrawImpl(ref GraphicContext context)
     {
         ImGui.Begin("Console");
 

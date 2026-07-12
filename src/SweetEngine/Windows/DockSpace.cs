@@ -1,8 +1,9 @@
 using SweetLib.Collections.Unsafe.List;
 using SweetEngine.APIs;
 using ImGuiNET;
+using SweetLib.Devices;
 
-namespace SweetEngine.Window;
+namespace SweetEngine.Windows;
 
 public unsafe struct DockSpace : IDisposable
 {
@@ -20,12 +21,12 @@ public unsafe struct DockSpace : IDisposable
         Windows.Add(new EditorWindowAPI() { Draw = &DebugWindow.DrawImpl });
     }
 
-    public void Draw()
+    public void Draw(ref GraphicContext context)
     {
         ImGui.DockSpaceOverViewport(ImGui.GetID("main_dock_space"), ImGui.GetMainViewport());
 
         for (uint i = 0; i < Windows.Length; i++)
-            Windows[i].Draw();
+            Windows[i].Draw(ref context);
     }
 
     public void Dispose()

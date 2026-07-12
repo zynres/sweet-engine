@@ -2,8 +2,9 @@ using SweetEngine.Controllers;
 using SweetEngine.Library.Resources;
 using System.Numerics;
 using ImGuiNET;
+using SweetLib.Devices;
 
-namespace SweetEngine.Window;
+namespace SweetEngine.Windows;
 
 public static unsafe class SceneWindow
 {
@@ -16,7 +17,7 @@ public static unsafe class SceneWindow
         SceneWindow.frameBuffer = frameBuffer;
     }
 
-    public static void DrawImpl()
+    public static void DrawImpl(ref GraphicContext context)
     {
         ImGui.Begin("Scene");
 
@@ -35,7 +36,7 @@ public static unsafe class SceneWindow
 
             if (isAspect)
             {
-                frameBuffer->Resize(0, 0, width, height);
+                frameBuffer->Resize(context.GL, 0, 0, width, height);
             }
             else
             {
@@ -59,7 +60,7 @@ public static unsafe class SceneWindow
                     vpY = (height - vpH) / 2;
                 }
 
-                frameBuffer->Resize(vpX, vpY, vpW, vpH);
+                frameBuffer->Resize(context.GL, vpX, vpY, vpW, vpH);
             
                 cameraController->Aspect = w / h;
             }
