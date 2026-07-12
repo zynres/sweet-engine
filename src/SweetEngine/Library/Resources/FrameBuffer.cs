@@ -1,13 +1,12 @@
-using SweetEngine.Rendering;
-using Silk.NET.OpenGL;
 using SweetLib.Devices;
+using Silk.NET.OpenGL;
 
 namespace SweetEngine.Library.Resources;
 
 public unsafe struct FrameBuffer
 {
-    public uint Id;
     public Texture2D Color;
+    public uint Id;
 
     public uint Depth;
 
@@ -100,7 +99,7 @@ public unsafe struct FrameBuffer
         gl.Viewport((int)X, (int)Y, Width, Height);
     }
 
-    public void UnBind(GL gl, in WindowDevice window)
+    public void UnBind(GL gl, in Window window)
     {
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         gl.Viewport(0, 0, (uint)window.Size.X, (uint)window.Size.Y);

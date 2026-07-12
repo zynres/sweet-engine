@@ -4,13 +4,13 @@
 using SweetEngine.Library.Resources.Shaders;
 using SweetEngine.Ingestion.Loader.Textures;
 using SweetEngine.Library.Resources;
-using SweetEngine.Window;
 using SweetEngine.Core.Enums;
+using SweetEngine.Windows;
+using SweetLib.Intents;
+using SweetLib.Devices;
 using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
-using SweetLib.Intents;
-using SweetLib.Devices;
 using ImGuiNET;
 
 namespace SweetEngine.Rendering.UI;
@@ -21,6 +21,7 @@ public unsafe struct ImGuiRenderer
     private Texture2D _fontTexture;
 
     private readonly DockSpace dockSpace;
+    private readonly Device* device;
     private readonly Glfw glfw;
     private readonly GL gl;
 
@@ -28,8 +29,9 @@ public unsafe struct ImGuiRenderer
     private uint _vbo;
     private uint _ebo;
 
-    public ImGuiRenderer(Texture2DLoader textureLoader, GL gl, Glfw glfw)
+    public ImGuiRenderer(Texture2DLoader textureLoader, Device* device, GL gl, Glfw glfw)
     {
+        this.device = device;
         this.glfw = glfw;
         this.gl = gl;
 
@@ -51,13 +53,13 @@ public unsafe struct ImGuiRenderer
         SetupBuffers();
     }
 
-    public void Update(WindowHandle* window, float deltaTime)
+    public void Update(ref GraphicContext context, in Intent intent)
     {
-        UpdateIO(window, deltaTime);
+        UpdateIO(context.Window, in intent);
 
         ImGui.NewFrame();
 
-        dockSpace.Draw();
+        dockSpace.Draw(ref context);
     }
 
     public void Render()
@@ -76,8 +78,8 @@ public unsafe struct ImGuiRenderer
         _ShaderSetter.SetInt("uTexture", 0);
 
         Matrix4x4 ortho = Matrix4x4.CreateOrthographicOffCenter(
-            0, Device.Window->Size.X,
-            Device.Window->Size.Y, 0,
+            0, device->Window.Size.X,
+            device->Window.Size.Y, 0,
             -1, 1
         );
 
@@ -132,7 +134,7 @@ public unsafe struct ImGuiRenderer
 
                 gl.Scissor(
                     (int)clip.X,
-                    (int)(Device.Window->Size.Y - clip.W),
+                    (int)(device->Window.Size.Y - clip.W),
                     (uint)(clip.Z - clip.X),
                     (uint)(clip.W - clip.Y)
                 );
@@ -150,26 +152,26 @@ public unsafe struct ImGuiRenderer
         gl.BindVertexArray(0);
     }
 
-    private void UpdateIO(WindowHandle* window, float deltaTime)
+    private void UpdateIO(WindowHandle* window, in Intent intent)
     {
         ImGuiIOPtr io = ImGui.GetIO();
 
-        io.DeltaTime = deltaTime;
-        io.DisplaySize = new Vector2(Device.Window->Size.X, Device.Window->Size.Y);
+        io.DeltaTime = device->Time.Delta;
+        io.DisplaySize = new Vector2(device->Window.Size.X, device->Window.Size.Y);
         io.DisplayFramebufferScale = new Vector2(1f, 1f);
 
-        io.AddMousePosEvent(Device.Mouse->Position.X, Device.Mouse->Position.Y);
+        io.AddMousePosEvent(device->Mouse.Position.X, device->Mouse.Position.Y);
 
-        io.AddMouseButtonEvent(0, Intent.IsHeld(MouseButton.Left));
-        io.AddMouseButtonEvent(1, Intent.IsHeld(MouseButton.Right));
-        io.AddMouseButtonEvent(2, Intent.IsHeld(MouseButton.Middle));
+        io.AddMouseButtonEvent(0, intent.IsHeld(MouseButton.Left));
+        io.AddMouseButtonEvent(1, intent.IsHeld(MouseButton.Right));
+        io.AddMouseButtonEvent(2, intent.IsHeld(MouseButton.Middle));
 
-        io.AddKeyEvent(ImGuiKey.Delete, Intent.IsHeld(Keys.Delete));
-        io.AddKeyEvent(ImGuiKey.Space, Intent.IsHeld(Keys.Space));
-        io.AddKeyEvent(ImGuiKey.A, Intent.IsHeld(Keys.A));
-        io.AddKeyEvent(ImGuiKey.W, Intent.IsHeld(Keys.W));
-        io.AddKeyEvent(ImGuiKey.S, Intent.IsHeld(Keys.S));
-        io.AddKeyEvent(ImGuiKey.D, Intent.IsHeld(Keys.D));
+        io.AddKeyEvent(ImGuiKey.Delete, intent.IsHeld(Keys.Delete));
+        io.AddKeyEvent(ImGuiKey.Space, intent.IsHeld(Keys.Space));
+        io.AddKeyEvent(ImGuiKey.A, intent.IsHeld(Keys.A));
+        io.AddKeyEvent(ImGuiKey.W, intent.IsHeld(Keys.W));
+        io.AddKeyEvent(ImGuiKey.S, intent.IsHeld(Keys.S));
+        io.AddKeyEvent(ImGuiKey.D, intent.IsHeld(Keys.D));
 
         glfw.SetCharCallback(window, (wnd, codepoint) =>
         {

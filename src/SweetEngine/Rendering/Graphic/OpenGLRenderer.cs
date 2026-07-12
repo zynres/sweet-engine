@@ -10,7 +10,7 @@ using SweetLib.Collections.Unsafe.List;
 using SweetEngine.Scene.Components;
 using SweetEngine.Rendering.UI;
 using SweetEngine.Controllers;
-using SweetEngine.Window;
+using SweetEngine.Windows;
 using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
@@ -43,7 +43,7 @@ public unsafe struct OpenGLRenderer
     {
         IsLineRender = IsLineRender = false;
 
-        GuiRenderer = new ImGuiRenderer(textureLoader, gl, glfw);
+        GuiRenderer = new ImGuiRenderer(textureLoader, device, gl, glfw);
         this.device = device;
         this.glfw = glfw;
         this.gl = gl;
@@ -53,7 +53,7 @@ public unsafe struct OpenGLRenderer
         _ShaderSetter = new ShaderSetter(gl, shader.vertexSrc, shader.fragmentSrc);
 
         _CameraController =(CameraController*)NativeMemory.Alloc((nuint)sizeof(CameraController)); 
-        *_CameraController = new CameraController();
+        *_CameraController = new CameraController(&device->Mouse, &device->Time);
 
         EntityDatas = new UnsafeList<EntityData>(100);
 
@@ -173,20 +173,20 @@ public unsafe struct OpenGLRenderer
         }
     }
 
-    public void Render(WindowHandle* window, in Intent intent)
+    public void Render(ref GraphicContext context, in Intent intent)
     {
         LineRenderMode(intent);
 
         device->Update(glfw, intent);
 
-        GuiRenderer.Update(window, device->Time.Delta);
+        GuiRenderer.Update(ref context, in intent);
 
         frameBuffer->Bind(gl);
 
         gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
         gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
 
-        _CameraController->Handle(device->Time.Delta);
+        _CameraController->Update(in intent);
 
         Matrix4x4 view = Matrix4x4.CreateLookAt(_CameraController->Transform.Position, _CameraController->Transform.Position + _CameraController->Transform.GetForward(), Vector3.UnitY);
         Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, _CameraController->Aspect, 0.1f, 1000f);
@@ -249,7 +249,7 @@ public unsafe struct OpenGLRenderer
         GuiRenderer.Render();
 
         gl.BindVertexArray(0);
-        glfw.SwapBuffers(window);
+        glfw.SwapBuffers(context.Window);
     }
 
     private void LineRenderMode(Intent intent)
@@ -291,7 +291,6 @@ public unsafe struct OpenGLRenderer
             _object.Dispose();
         }
 
-        _CameraController->Dispose();
         frameBuffer->Dispose(gl);
 
         NativeMemory.Free(_CameraController);

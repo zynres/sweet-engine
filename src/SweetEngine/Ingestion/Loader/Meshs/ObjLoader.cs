@@ -16,17 +16,17 @@ public unsafe struct ObjLoader
         /*Stopwatch stopwatch = new();
         stopwatch.Start();*/
 
-        using UnsafeList<Vector3> positions = new(128);
-        using UnsafeList<Vector3> normals = new(128);
-        using UnsafeList<Vector2> uvs = new(128);
+        UnsafeList<Vector3> positions = new(128);
+        UnsafeList<Vector3> normals = new(128);
+        UnsafeList<Vector2> uvs = new(128);
 
-        using UnsafeList<float> finalVerts = new(128);
-        using UnsafeList<uint> indices = new(128);
+        UnsafeList<float> finalVerts = new(128);
+        UnsafeList<uint> indices = new(128);
         Dictionary<VertexKey, uint> vertexMap = new();
 
-        using UnsafeList<Vector3> vertexPositions = new(128);
-        using UnsafeList<Vector2> vertexUVs = new(128);
-        using UnsafeList<Vector3> tan1 = new(128);
+        UnsafeList<Vector3> vertexPositions = new(128);
+        UnsafeList<Vector2> vertexUVs = new(128);
+        UnsafeList<Vector3> tan1 = new(128);
 
         foreach (var line in File.ReadLines(path))
         {
@@ -62,7 +62,7 @@ public unsafe struct ObjLoader
 
                 if (parts.Length < 3) continue;
 
-                using var faceIndices = new UnsafeArray<uint>((uint)parts.Length);
+                var faceIndices = new UnsafeArray<uint>((uint)parts.Length);
 
                 for (uint j = 0; j < parts.Length; j++)
                 {
@@ -80,7 +80,7 @@ public unsafe struct ObjLoader
                         var uv = (tIndex >= 0 && tIndex < uvs.Length) ? uvs[(uint)tIndex] : new Vector2();
                         var norm = (nIndex >= 0 && nIndex < normals.Length) ? normals[(uint)nIndex] : new Vector3();
 
-                        using var values = new UnsafeArray<float>(11);
+                        var values = new UnsafeArray<float>(11);
 
                         values.Data[0] = pos.X;
                         values.Data[1] = pos.Y;
@@ -105,6 +105,8 @@ public unsafe struct ObjLoader
                         vertexPositions.Add(pos);
                         vertexUVs.Add(uv);
                         tan1.Add(Vector3.Zero);
+                        
+                        values.Dispose();
                     }
 
                     faceIndices.Set(j, index);
@@ -146,6 +148,8 @@ public unsafe struct ObjLoader
                     tan1[i1] += tangent;
                     tan1[i2] += tangent;
                 }
+
+                faceIndices.Dispose();
             }
         }
 
@@ -168,6 +172,17 @@ public unsafe struct ObjLoader
 
         finalVerts.CopyTo(&mesh.Vertices);
         indices.CopyTo(&mesh.Indices);
+
+        positions.Dispose();
+        normals.Dispose();
+        uvs.Dispose();
+
+        finalVerts.Dispose();
+        indices.Dispose();
+
+        vertexPositions.Dispose();
+        vertexUVs.Dispose();
+        tan1.Dispose();
 
         /*Console.WriteLine($"Vertices: {mesh.Vertices.Length}");
         Console.WriteLine($"Indices: {mesh.Indices.Length}");

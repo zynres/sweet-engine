@@ -1,7 +1,6 @@
 namespace SweetEngine.Library.Resources;
 
-
-public readonly struct VertexKey : IEquatable<VertexKey>
+public readonly struct VertexKey
 {
     public readonly int PosIndex;
     public readonly int UVIndex;

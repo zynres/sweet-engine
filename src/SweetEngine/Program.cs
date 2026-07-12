@@ -9,6 +9,7 @@ using SweetEngine.Core.Enums;
 using SweetEngine.Core;
 using System.Numerics;
 using Silk.NET.GLFW;
+using SweetEngine.Windows;
 
 
 namespace SweetEngine;
@@ -21,12 +22,15 @@ unsafe class Program
         {
             var engine = new Engine();
 
-            engine.Initialize();
+            engine.Init();
 
-            WindowHandle* window = engine.Editor.Window;
+            WindowHandle* window = engine.Context.Window;
 
-            var glfw = engine.Editor.Glfw;
-            var gl = engine.Editor.GL;
+            var glfw = engine.Context.Glfw;
+            var gl = engine.Context.GL;
+
+            DebugWindow.Window = &engine.Device.Window;
+            DebugWindow.Mouse = &engine.Device.Mouse;
 
             var textureLoader = new Texture2DLoader(gl);
             var rendering = new OpenGLRenderer(gl, glfw, &engine.Device, in textureLoader);
@@ -55,7 +59,7 @@ unsafe class Program
             {
                 glfw.PollEvents();
 
-                rendering.Render(window, in engine.Intent);
+                rendering.Render(ref engine.Context, in engine.Intent);
 
                 engine.Intent.KickBackInvoke();
                 Thread.Sleep(6);

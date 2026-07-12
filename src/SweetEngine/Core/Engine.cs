@@ -1,16 +1,18 @@
 using SweetEngine.Rendering;
 using SweetEngine.Library;
-using SweetEngine.Window;
+using SweetEngine.Windows;
 using SweetEngine.Scene;
 using SweetLib.Intents;
 using SweetLib.Devices;
-using Silk.NET.GLFW;
-using Silk.NET.OpenGL;
 
 namespace SweetEngine.Core;
 
 public unsafe struct Engine
 {
+    internal GraphicContext Context;
+    public Device Device;
+    public Intent Intent;
+
     public World World;
 
     public Module Module;
@@ -19,14 +21,14 @@ public unsafe struct Engine
     public Renderer Renderer;
     public Resource Resource;
 
-    public Intent Intent;
-    public Device Device;
     public Editor Editor;
     public Gui Gui;
 
-
-    public void Initialize()
+    public void Init()
     {
+        Context = Device.Init();
+        Intent.Init(Context.Window, Context.Glfw);
+
         World = new();
         Module = new();
         Process = new();
@@ -40,9 +42,6 @@ public unsafe struct Engine
         Gui = new();
         Intent = new();
         Device = new();
-
-        Device.Init(Editor.Window, Editor.Glfw);
-        Intent.Init(Editor.Window, Editor.Glfw);
     }
 
     public void Dispose()
