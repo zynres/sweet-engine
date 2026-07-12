@@ -1,9 +1,9 @@
 using System.Runtime.InteropServices;
 using SweetEngine.Scene.Components;
-using Sweet.Intents.Generated;
+using SweetLib.Intents.Generated;
 using System.Numerics;
-using Sweet.Intents;
-using Sweet.Devices;
+using SweetLib.Intents;
+using SweetLib.Devices;
 
 namespace SweetEngine.Controllers;
 

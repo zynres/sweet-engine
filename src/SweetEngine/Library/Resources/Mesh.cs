@@ -1,4 +1,4 @@
-using Sweet.Collections.Unsafe.Array;
+using SweetLib.Collections.Unsafe.Array;
 
 namespace SweetEngine.Library.Resources;
 

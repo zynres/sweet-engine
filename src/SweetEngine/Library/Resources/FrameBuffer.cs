@@ -1,6 +1,6 @@
 using SweetEngine.Rendering;
 using Silk.NET.OpenGL;
-using Sweet.Devices;
+using SweetLib.Devices;
 
 namespace SweetEngine.Library.Resources;
 
@@ -100,10 +100,10 @@ public unsafe struct FrameBuffer
         gl.Viewport((int)X, (int)Y, Width, Height);
     }
 
-    public void UnBind(GL gl)
+    public void UnBind(GL gl, in WindowDevice window)
     {
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-        gl.Viewport(0, 0, (uint)Device.Window->Size.X, (uint)Device.Window->Size.Y);
+        gl.Viewport(0, 0, (uint)window.Size.X, (uint)window.Size.Y);
     }
 
     public void Dispose(GL gl)

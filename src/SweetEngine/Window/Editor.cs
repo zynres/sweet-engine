@@ -9,43 +9,41 @@ namespace SweetEngine.Window;
 
 public unsafe struct Editor
 {
-    public GL GL { get; private set; }
+    public WindowHandle* Window { get; private set; }
     public Glfw Glfw { get; private set; }
+    public GL GL { get; private set; }
 
     public void Init()
     {
-        
+        CreateWindow(1060, 640);
     }
     
-    public WindowHandle* CreateWindow(short sizeX, short sizeY)
+    private void CreateWindow(short sizeX, short sizeY)
     {
         SetupDisplayBackend();
 
         Glfw = Glfw.GetApi();
 
-        var glfw = Glfw;
-
-        if (!glfw.Init())
+        if (!Glfw.Init())
             throw new Exception("Failed to init GLFW");
 
         _ = AssetDirectories.Root;
 
-        glfw.WindowHint(WindowHintInt.ContextVersionMajor, 3);
-        glfw.WindowHint(WindowHintInt.ContextVersionMinor, 3);
-        glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.OpenGL);
-        glfw.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core);
+        Glfw.WindowHint(WindowHintInt.ContextVersionMajor, 3);
+        Glfw.WindowHint(WindowHintInt.ContextVersionMinor, 3);
+        Glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.OpenGL);
+        Glfw.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core);
 
-        WindowHandle* window = glfw.CreateWindow(sizeX, sizeY, "Sweet Engine", null, null);
+        WindowHandle* window = Glfw.CreateWindow(sizeX, sizeY, "Sweet Engine", null, null);
 
         if (window == null)
             throw new Exception("Failed to create window");
 
-        glfw.MakeContextCurrent(window);
-        glfw.SetWindowOpacity(window, 1f);
+        Glfw.MakeContextCurrent(window);
+        Glfw.SetWindowOpacity(window, 1f);
 
-        GL = GL.GetApi(glfw.GetProcAddress);
-
-        return window;
+        GL = GL.GetApi(Glfw.GetProcAddress);
+        Window = window;
     }
 
     private void SetupDisplayBackend()

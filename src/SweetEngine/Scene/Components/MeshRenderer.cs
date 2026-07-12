@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using Sweet.Collections.Unsafe.Array;
+using SweetLib.Collections.Unsafe.Array;
 using SweetEngine.Library.Resources;
 
 namespace SweetEngine.Scene.Components;

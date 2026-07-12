@@ -1,5 +1,5 @@
 using SweetEngine.Ingestion.Loader.Textures;
-using Sweet.Collections.Unsafe.Array;
+using SweetLib.Collections.Unsafe.Array;
 using SweetEngine.Rendering;
 using SweetEngine.Core.Enums;
 using System.Numerics;

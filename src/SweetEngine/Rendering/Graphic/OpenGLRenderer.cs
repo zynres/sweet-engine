@@ -6,7 +6,7 @@ using SweetEngine.Ingestion.Loader.Textures;
 using SweetEngine.Ingestion.Loader.Meshs;
 using System.Runtime.InteropServices;
 using SweetEngine.Library.Resources;
-using Sweet.Collections.Unsafe.List;
+using SweetLib.Collections.Unsafe.List;
 using SweetEngine.Scene.Components;
 using SweetEngine.Rendering.UI;
 using SweetEngine.Controllers;
@@ -14,8 +14,8 @@ using SweetEngine.Window;
 using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
-using Sweet.Intents;
-using Sweet.Devices;
+using SweetLib.Intents;
+using SweetLib.Devices;
 
 namespace SweetEngine.Rendering.Graphic;
 
@@ -30,6 +30,8 @@ public unsafe struct OpenGLRenderer
 
     public Dictionary<string, ObjLoader> MeshLoaders;
 
+    private readonly Device* device;
+
     private readonly Glfw glfw;
     private readonly GL gl;
 
@@ -37,11 +39,12 @@ public unsafe struct OpenGLRenderer
 
     private bool isBinding { get; set; }
 
-    public OpenGLRenderer(Texture2DLoader textureLoader, GL gl, Glfw glfw)
+    public OpenGLRenderer(GL gl, Glfw glfw, Device* device, in Texture2DLoader textureLoader)
     {
         IsLineRender = IsLineRender = false;
 
         GuiRenderer = new ImGuiRenderer(textureLoader, gl, glfw);
+        this.device = device;
         this.glfw = glfw;
         this.gl = gl;
 
@@ -170,20 +173,20 @@ public unsafe struct OpenGLRenderer
         }
     }
 
-    public void Render(WindowHandle* window)
+    public void Render(WindowHandle* window, in Intent intent)
     {
-        LineRenderMode();
+        LineRenderMode(intent);
 
-        Device.Update();
+        device->Update(glfw, intent);
 
-        GuiRenderer.Update(window, Device.Time->Delta);
+        GuiRenderer.Update(window, device->Time.Delta);
 
         frameBuffer->Bind(gl);
 
         gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
         gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
 
-        _CameraController->Handle(Device.Time->Delta);
+        _CameraController->Handle(device->Time.Delta);
 
         Matrix4x4 view = Matrix4x4.CreateLookAt(_CameraController->Transform.Position, _CameraController->Transform.Position + _CameraController->Transform.GetForward(), Vector3.UnitY);
         Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4f, _CameraController->Aspect, 0.1f, 1000f);
@@ -198,9 +201,9 @@ public unsafe struct OpenGLRenderer
             
             _ShaderSetter.SetVector4("uColor", _object.Renderer.material->Color);
 
-            _object.Transform.Rotation.Y = Device.Time->Current / 2;
+            _object.Transform.Rotation.Y = device->Time.Current / 2;
             
-            _object.Transform.Position += _object.Direction * 2 * Device.Time->Delta;
+            _object.Transform.Position += _object.Direction * 2 * device->Time.Delta;
 
             Matrix4x4 model = _object.Transform.LocalToWorldMatrix;
 
@@ -241,7 +244,7 @@ public unsafe struct OpenGLRenderer
             }
         }
 
-        frameBuffer->UnBind(gl);
+        frameBuffer->UnBind(gl, in device->Window);
 
         GuiRenderer.Render();
 
@@ -249,9 +252,9 @@ public unsafe struct OpenGLRenderer
         glfw.SwapBuffers(window);
     }
 
-    private void LineRenderMode()
+    private void LineRenderMode(Intent intent)
     {
-        if (Intent.IsHeld(Keys.Number1))
+        if (intent.IsHeld(Keys.Number1))
         {
             if (IsLineRender)
             {
@@ -260,7 +263,7 @@ public unsafe struct OpenGLRenderer
                 Console.WriteLine($"[Render Mode] => Fill mode");
             }
         }
-        else if (Intent.IsHeld(Keys.Number2))
+        else if (intent.IsHeld(Keys.Number2))
         {
             if (!IsLineRender)
             {

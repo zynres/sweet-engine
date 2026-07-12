@@ -18,8 +18,8 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\libraries\sweetlib-collections\src\Sweet.Collections\Sweet.Collections.csproj" /> 
-    <ProjectReference Include="..\..\libraries\sweetlib-platform\src\Sweet.Intents\Sweet.Intents.csproj" /> 
-    <ProjectReference Include="..\..\libraries\sweetlib-platform\src\Sweet.Devices\Sweet.Devices.csproj" /> 
+    <ProjectReference Include="..\..\libraries\sweetlib-collections\src\SweetLib.Collections\SweetLib.Collections.csproj" /> 
+    <ProjectReference Include="..\..\libraries\sweetlib-platform\src\SweetLib.Intents\SweetLib.Intents.csproj" /> 
+    <ProjectReference Include="..\..\libraries\sweetlib-platform\src\SweetLib.Devices\SweetLib.Devices.csproj" /> 
   </ItemGroup>
 </Project>

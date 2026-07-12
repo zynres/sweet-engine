@@ -1,8 +1,8 @@
 <Solution>
 	<Project Path="src/SweetEngine/SweetEngine.csproj" />
 	
-	<Project Path="libraries/sweetlib-platform/src/Sweet.Intents/Sweet.Intents.csproj" />
-	<Project Path="libraries/sweetlib-platform/src/Sweet.Devices/Sweet.Devices.csproj" />
+	<Project Path="libraries/sweetlib-platform/src/SweetLib.Intents/SweetLib.Intents.csproj" />
+	<Project Path="libraries/sweetlib-platform/src/SweetLib.Devices/SweetLib.Devices.csproj" />
 
-	<Project Path="libraries/sweetlib-collections/src/Sweet.Collections/Sweet.Collections.csproj" />
+	<Project Path="libraries/sweetlib-collections/src/SweetLib.Collections/SweetLib.Collections.csproj" />
 </Solution>

@@ -1,5 +1,5 @@
-using Sweet.Collections.Unsafe.HashSet;
-using Sweet.Collections.Unsafe.Array;
+using SweetLib.Collections.Unsafe.HashSet;
+using SweetLib.Collections.Unsafe.Array;
 
 namespace SweetEngine.Ingestion.Loader.Meshs;
 

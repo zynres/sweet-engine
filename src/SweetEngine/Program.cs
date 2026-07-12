@@ -6,12 +6,10 @@ using System.Runtime.InteropServices;
 using SweetEngine.Rendering.Graphic;
 using SweetEngine.Library.Resources;
 using SweetEngine.Core.Enums;
-using SweetEngine.Rendering;
 using SweetEngine.Core;
 using System.Numerics;
 using Silk.NET.GLFW;
-using Sweet.Intents;
-using Sweet.Devices;
+
 
 namespace SweetEngine;
 
@@ -21,20 +19,17 @@ unsafe class Program
     {
         try
         {
-            Engine engine = new Engine();
+            var engine = new Engine();
 
             engine.Initialize();
 
-            WindowHandle* window = engine.Editor.CreateWindow(1060, 640);
+            WindowHandle* window = engine.Editor.Window;
 
             var glfw = engine.Editor.Glfw;
             var gl = engine.Editor.GL;
 
-            Device.Init(window, glfw);
-            Intent.Init(window, glfw);
-
             var textureLoader = new Texture2DLoader(gl);
-            var rendering = new OpenGLRenderer(textureLoader, gl, glfw);
+            var rendering = new OpenGLRenderer(gl, glfw, &engine.Device, in textureLoader);
 
             var _baseMap = textureLoader.Load(TextureType.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
             var _normalMap = textureLoader.Load(TextureType.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
@@ -60,14 +55,13 @@ unsafe class Program
             {
                 glfw.PollEvents();
 
-                rendering.Render(window);
+                rendering.Render(window, in engine.Intent);
 
-                Intent.KickBackInvoke();
+                engine.Intent.KickBackInvoke();
                 Thread.Sleep(6);
             }
 
-            Device.Dispose();
-            Intent.Dispose();
+            engine.Dispose();
 
             rendering.Dispose();
 

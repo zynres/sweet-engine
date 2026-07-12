@@ -9,8 +9,8 @@ using SweetEngine.Core.Enums;
 using System.Numerics;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
-using Sweet.Intents;
-using Sweet.Devices;
+using SweetLib.Intents;
+using SweetLib.Devices;
 using ImGuiNET;
 
 namespace SweetEngine.Rendering.UI;

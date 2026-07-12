@@ -1,8 +1,8 @@
 // Copyright © 2026 Zynres.
 // Licensed under the Apache-2.0 License.
 
-using Sweet.Collections.Unsafe.Array;
-using Sweet.Collections.Unsafe.List;
+using SweetLib.Collections.Unsafe.Array;
+using SweetLib.Collections.Unsafe.List;
 using SweetEngine.Library.Resources;
 using System.Globalization;
 using System.Numerics;
