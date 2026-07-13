@@ -32,21 +32,19 @@ public unsafe struct OpenGLRenderer
 
     private readonly Device* device;
 
-    private readonly Glfw glfw;
-    private readonly GL gl;
-
     public bool IsLineRender { get; set; }
 
     private bool isBinding { get; set; }
 
-    public OpenGLRenderer(GL gl, Glfw glfw, Device* device, in Texture2DLoader textureLoader)
+    public OpenGLRenderer(Device* device, in Texture2DLoader textureLoader)
     {
+        var glfw = GraphicContext.Glfw;
+        var gl = GraphicContext.GL;
+
         IsLineRender = IsLineRender = false;
 
         GuiRenderer = new ImGuiRenderer(textureLoader, device, gl, glfw);
         this.device = device;
-        this.glfw = glfw;
-        this.gl = gl;
 
         var shader = new Library.Resources.Shaders.Shader();
 
@@ -69,6 +67,8 @@ public unsafe struct OpenGLRenderer
 
     public void AddObject(string path, Material* mat)
     {
+        var gl = GraphicContext.GL;
+
         var mesh = MeshLoaders[Path.GetExtension(path)].Load(path);
 
         uint _vao = gl.GenVertexArray();
@@ -139,6 +139,8 @@ public unsafe struct OpenGLRenderer
 
     public void InitializeObjects()
     {
+        var gl = GraphicContext.GL;
+
         gl.FrontFace(FrontFaceDirection.Ccw);
         gl.Enable(EnableCap.DepthTest);
 
@@ -154,7 +156,7 @@ public unsafe struct OpenGLRenderer
         _ShaderSetter.SetFloat("uLightIntensity", 2f);
 
         frameBuffer = (FrameBuffer*)NativeMemory.Alloc((nuint)sizeof(FrameBuffer)); 
-        *frameBuffer = new FrameBuffer(gl, 640, 320);
+        *frameBuffer = new FrameBuffer(640, 320);
 
         SceneWindow.Depends(frameBuffer, _CameraController);
 
@@ -162,7 +164,7 @@ public unsafe struct OpenGLRenderer
         {
             ref EntityData _object = ref EntityDatas[i];
 
-            _object.Transform.Scale = new Vector3(0.25f, 0.25f, 0.25f);
+            _object.Transform.Scale = new Vector3(1f, 1f, 1f);
 
             _object.Direction = new Vector3(
                 Random.Shared.NextSingle() * 2 - 1, 
@@ -173,15 +175,17 @@ public unsafe struct OpenGLRenderer
         }
     }
 
-    public void Render(ref GraphicContext context, in Intent intent)
+    public void Render(in Intent intent)
     {
+        var gl = GraphicContext.GL;
+
         LineRenderMode();
 
-        device->Update(glfw);
+        device->Update();
 
-        GuiRenderer.Update(ref context);
+        GuiRenderer.Update();
 
-        frameBuffer->Bind(gl);
+        frameBuffer->Bind();
 
         gl.ClearColor(0.02f, 0.02f, 0.03f, 1.0f);
         gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
@@ -203,7 +207,7 @@ public unsafe struct OpenGLRenderer
 
             _object.Transform.Rotation.Y = device->Time.Current / 2;
             
-            _object.Transform.Position += _object.Direction * 2 * device->Time.Delta;
+            //_object.Transform.Position += _object.Direction * 2 * device->Time.Delta;
 
             Matrix4x4 model = _object.Transform.LocalToWorldMatrix;
 
@@ -244,12 +248,12 @@ public unsafe struct OpenGLRenderer
             }
         }
 
-        frameBuffer->UnBind(gl, in device->Window);
+        frameBuffer->UnBind(in device->Window);
 
         GuiRenderer.Render();
 
         gl.BindVertexArray(0);
-        glfw.SwapBuffers(context.Window);
+        GraphicContext.Glfw.SwapBuffers(GraphicContext.Window);
     }
 
     private void LineRenderMode()
@@ -276,8 +280,7 @@ public unsafe struct OpenGLRenderer
 
     public void Dispose()
     {
-        if (gl == null)
-            return;
+        var gl = GraphicContext.GL;
 
         GuiRenderer.Dispose();
 
@@ -291,7 +294,7 @@ public unsafe struct OpenGLRenderer
             _object.Dispose();
         }
 
-        frameBuffer->Dispose(gl);
+        frameBuffer->Dispose();
 
         NativeMemory.Free(_CameraController);
         NativeMemory.Free(frameBuffer);

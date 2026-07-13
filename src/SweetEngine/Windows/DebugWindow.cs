@@ -8,7 +8,7 @@ public static unsafe class DebugWindow
     public static Mouse* Mouse;
     public static Window* Window;
     
-    public static void DrawImpl(ref GraphicContext context)
+    public static void DrawImpl()
     {
         ImGui.Begin("Debug");
 

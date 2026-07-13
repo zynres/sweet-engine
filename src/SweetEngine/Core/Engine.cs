@@ -9,7 +9,6 @@ namespace SweetEngine.Core;
 
 public unsafe struct Engine
 {
-    internal GraphicContext Context;
     public Device Device;
     public Intent Intent;
 
@@ -27,10 +26,10 @@ public unsafe struct Engine
     public void Init()
     {
         Device = new();
-        Context = Device.Init();
+        Device.Init();
         
         Intent = new();
-        Intent.Init(Context.Window, Context.Glfw);
+        Intent.Init(GraphicContext.Window, GraphicContext.Glfw);
 
         World = new();
         Module = new();

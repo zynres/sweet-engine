@@ -5,7 +5,7 @@ namespace SweetEngine.Windows;
 
 public static class HierarchyWindow
 {
-    public static void DrawImpl(ref GraphicContext context)
+    public static void DrawImpl()
     {
         ImGui.Begin("Hierarchy");
 

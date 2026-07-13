@@ -53,13 +53,13 @@ public unsafe struct ImGuiRenderer
         SetupBuffers();
     }
 
-    public void Update(ref GraphicContext context)
+    public void Update()
     {
-        UpdateIO(context.Window);
+        UpdateIO();
 
         ImGui.NewFrame();
 
-        dockSpace.Draw(ref context);
+        dockSpace.Draw();
     }
 
     public void Render()
@@ -152,7 +152,7 @@ public unsafe struct ImGuiRenderer
         gl.BindVertexArray(0);
     }
 
-    private void UpdateIO(WindowHandle* window)
+    private void UpdateIO()
     {
         ImGuiIOPtr io = ImGui.GetIO();
 
@@ -173,7 +173,7 @@ public unsafe struct ImGuiRenderer
         io.AddKeyEvent(ImGuiKey.S, Input.IsHeld(Keys.S));
         io.AddKeyEvent(ImGuiKey.D, Input.IsHeld(Keys.D));
 
-        glfw.SetCharCallback(window, (wnd, codepoint) =>
+        glfw.SetCharCallback(GraphicContext.Window, (wnd, codepoint) =>
         {
             io.AddInputCharacter(codepoint);
         });

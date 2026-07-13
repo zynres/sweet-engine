@@ -14,28 +14,30 @@ public unsafe struct FrameBuffer
     public uint Height;
     public uint X, Y;
 
-    public FrameBuffer(GL gl, uint width, uint height)
+    public FrameBuffer(uint width, uint height)
     {
         Width = width;
         Height = height;
 
-        CreateAttachment(gl);
+        CreateAttachment();
 
     }
 
-    public void Resize(GL gl, uint x, uint y, uint width, uint height)
+    public void Resize(uint x, uint y, uint width, uint height)
     {
         Width = width;
         Height = height;
         X = x;
         Y = y;
 
-        Dispose(gl);
-        CreateAttachment(gl);
+        Dispose();
+        CreateAttachment();
     }
 
-    private void CreateAttachment(GL gl)
+    private void CreateAttachment()
     {
+        var gl = GraphicContext.GL;
+
         // create frame buffer
         gl.GenFramebuffers(1, out uint framebuffer);
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, framebuffer);
@@ -93,20 +95,26 @@ public unsafe struct FrameBuffer
         return tex;
     }
 
-    public void Bind(GL gl)
+    public void Bind()
     {
+        var gl = GraphicContext.GL;
+
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, Id);
         gl.Viewport((int)X, (int)Y, Width, Height);
     }
 
-    public void UnBind(GL gl, in Window window)
+    public void UnBind(in Window window)
     {
+        var gl = GraphicContext.GL;
+
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         gl.Viewport(0, 0, (uint)window.Size.X, (uint)window.Size.Y);
     }
 
-    public void Dispose(GL gl)
+    public void Dispose()
     {
+        var gl = GraphicContext.GL;
+
         if (Color.Id != 0)
             gl.DeleteTexture(Color.Id);
 

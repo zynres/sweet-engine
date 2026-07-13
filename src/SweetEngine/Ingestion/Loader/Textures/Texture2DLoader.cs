@@ -6,6 +6,7 @@ using SweetEngine.Library.Resources;
 using SweetEngine.Core.Enums;
 using Silk.NET.OpenGL;
 using StbImageSharp;
+using SweetLib.Devices;
 
 namespace SweetEngine.Ingestion.Loader.Textures;
 
@@ -14,12 +15,8 @@ public unsafe struct Texture2DLoader
     private readonly UnsafeDictionary<TextureType, uint> default_maps;
     private readonly UnsafeDictionary<TextureType, TextureUnit> units;
 
-    private readonly GL gl;
-
-    public Texture2DLoader(GL gl)
+    public Texture2DLoader()
     {
-        this.gl = gl;
-
         default_maps = new(3)
         {
             [TextureType.BaseMap | TextureType.None] = CreateDefaultTexture(TextureType.BaseMap),
@@ -38,6 +35,7 @@ public unsafe struct Texture2DLoader
     public readonly Texture2D Load(TextureType format, string path)
     {
         TextureUnit unit = units[format];
+        var gl = GraphicContext.GL;
 
         try
         {
@@ -74,6 +72,7 @@ public unsafe struct Texture2DLoader
     public readonly Texture2D Load(TextureType format, ReadOnlySpan<byte> pixels, int width, int height)
     {
         TextureUnit unit = units[format];
+        var gl = GraphicContext.GL;
 
         try
         {
@@ -117,6 +116,8 @@ public unsafe struct Texture2DLoader
 
     private readonly uint CreateDefaultTexture(TextureType TextureType)
     {
+        var gl = GraphicContext.GL;
+
         uint tex = gl.GenTexture();
         gl.BindTexture(TextureTarget.Texture2D, tex);
 

@@ -7,5 +7,5 @@ namespace SweetEngine.APIs;
 
 public unsafe struct EditorWindowAPI
 {
-    public delegate*<ref GraphicContext, void> Draw;
+    public delegate*<void> Draw;
 }

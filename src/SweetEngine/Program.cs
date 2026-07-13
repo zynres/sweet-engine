@@ -10,6 +10,7 @@ using SweetEngine.Core;
 using System.Numerics;
 using Silk.NET.GLFW;
 using SweetEngine.Windows;
+using SweetLib.Devices;
 
 
 namespace SweetEngine;
@@ -24,16 +25,15 @@ unsafe class Program
 
             engine.Init();
 
-            WindowHandle* window = engine.Context.Window;
-
-            var glfw = engine.Context.Glfw;
-            var gl = engine.Context.GL;
+            var window = GraphicContext.Window;
+            var glfw = GraphicContext.Glfw;
+            var gl = GraphicContext.GL;
 
             DebugWindow.Window = &engine.Device.Window;
             DebugWindow.Mouse = &engine.Device.Mouse;
 
-            var textureLoader = new Texture2DLoader(gl);
-            var rendering = new OpenGLRenderer(gl, glfw, &engine.Device, in textureLoader);
+            var textureLoader = new Texture2DLoader();
+            var rendering = new OpenGLRenderer(&engine.Device, in textureLoader);
 
             var _baseMap = textureLoader.Load(TextureType.BaseMap, AssetDirectories.Textures + "/sakuya-Base_Color.png");
             var _normalMap = textureLoader.Load(TextureType.NormalMap, AssetDirectories.Textures + "/sakuya-Normal.png");
@@ -48,14 +48,14 @@ unsafe class Program
             mat->Color = new Vector4(1, 1, 1, 1);
 
             rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
-            rendering.AddObject(AssetDirectories.Models + "/cube.obj", mat);
+            //rendering.AddObject(AssetDirectories.Models + "/cube.obj", mat);
             rendering.InitializeObjects();
 
             while (!glfw.WindowShouldClose(window))
             {
                 glfw.PollEvents();
 
-                rendering.Render(ref engine.Context, in engine.Intent);
+                rendering.Render(in engine.Intent);
 
                 engine.Intent.KickBackInvoke();
                 Thread.Sleep(6);

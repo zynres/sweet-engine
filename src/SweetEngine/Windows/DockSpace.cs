@@ -21,12 +21,12 @@ public unsafe struct DockSpace : IDisposable
         Windows.Add(new EditorWindowAPI() { Draw = &DebugWindow.DrawImpl });
     }
 
-    public void Draw(ref GraphicContext context)
+    public void Draw()
     {
         ImGui.DockSpaceOverViewport(ImGui.GetID("main_dock_space"), ImGui.GetMainViewport());
 
         for (uint i = 0; i < Windows.Length; i++)
-            Windows[i].Draw(ref context);
+            Windows[i].Draw();
     }
 
     public void Dispose()
