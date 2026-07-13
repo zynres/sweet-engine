@@ -1,9 +1,9 @@
-using SweetEngine.Rendering;
-using SweetEngine.Library;
-using SweetEngine.Windows;
-using SweetEngine.Scene;
+using SweetEngine.Resources;
+using SweetEngine.Graphics;
+using SweetEngine.Editor;
 using SweetLib.Intents;
 using SweetLib.Devices;
+using SweetEngine.MDI;
 
 namespace SweetEngine.Core;
 
@@ -12,16 +12,14 @@ public unsafe struct Engine
     public Device Device;
     public Intent Intent;
 
-    public World World;
+    public KitchenManager Kitchen;
+    public MixerManager Mixer;
 
-    public Module Module;
-    public Process Process;
+    public RenderPipeline Renderer;
+    public ResourceManager Resource;
 
-    public Renderer Renderer;
-    public Resource Resource;
-
-    public Editor Editor;
-    public Gui Gui;
+    public EditorManager Editor;
+    public GuiSystem Gui;
 
     public void Init()
     {
@@ -31,9 +29,8 @@ public unsafe struct Engine
         Intent = new();
         Intent.Init(GraphicContext.Window, GraphicContext.Glfw);
 
-        World = new();
-        Module = new();
-        Process = new();
+        Kitchen = new();
+        Mixer = new();
 
         Renderer = new();
         Resource = new();

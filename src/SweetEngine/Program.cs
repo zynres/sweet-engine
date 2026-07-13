@@ -1,16 +1,15 @@
 ﻿// Copyright © 2026 Zynres.
 // Licensed under the Apache-2.0 License.
 
-using SweetEngine.Ingestion.Loader.Textures;
 using System.Runtime.InteropServices;
-using SweetEngine.Rendering.Graphic;
-using SweetEngine.Library.Resources;
+using SweetEngine.Editor.Windows;
 using SweetEngine.Core.Enums;
+using SweetEngine.IO.Loaders;
+using SweetEngine.Resources;
+using SweetEngine.Graphics;
+using SweetLib.Devices;
 using SweetEngine.Core;
 using System.Numerics;
-using Silk.NET.GLFW;
-using SweetEngine.Windows;
-using SweetLib.Devices;
 
 
 namespace SweetEngine;
