@@ -53,9 +53,9 @@ public unsafe struct ImGuiRenderer
         SetupBuffers();
     }
 
-    public void Update(ref GraphicContext context, in Intent intent)
+    public void Update(ref GraphicContext context)
     {
-        UpdateIO(context.Window, in intent);
+        UpdateIO(context.Window);
 
         ImGui.NewFrame();
 
@@ -152,7 +152,7 @@ public unsafe struct ImGuiRenderer
         gl.BindVertexArray(0);
     }
 
-    private void UpdateIO(WindowHandle* window, in Intent intent)
+    private void UpdateIO(WindowHandle* window)
     {
         ImGuiIOPtr io = ImGui.GetIO();
 
@@ -162,16 +162,16 @@ public unsafe struct ImGuiRenderer
 
         io.AddMousePosEvent(device->Mouse.Position.X, device->Mouse.Position.Y);
 
-        io.AddMouseButtonEvent(0, intent.IsHeld(MouseButton.Left));
-        io.AddMouseButtonEvent(1, intent.IsHeld(MouseButton.Right));
-        io.AddMouseButtonEvent(2, intent.IsHeld(MouseButton.Middle));
+        io.AddMouseButtonEvent(0, Input.IsHeld(MouseButton.Left));
+        io.AddMouseButtonEvent(1, Input.IsHeld(MouseButton.Right));
+        io.AddMouseButtonEvent(2, Input.IsHeld(MouseButton.Middle));
 
-        io.AddKeyEvent(ImGuiKey.Delete, intent.IsHeld(Keys.Delete));
-        io.AddKeyEvent(ImGuiKey.Space, intent.IsHeld(Keys.Space));
-        io.AddKeyEvent(ImGuiKey.A, intent.IsHeld(Keys.A));
-        io.AddKeyEvent(ImGuiKey.W, intent.IsHeld(Keys.W));
-        io.AddKeyEvent(ImGuiKey.S, intent.IsHeld(Keys.S));
-        io.AddKeyEvent(ImGuiKey.D, intent.IsHeld(Keys.D));
+        io.AddKeyEvent(ImGuiKey.Delete, Input.IsHeld(Keys.Delete));
+        io.AddKeyEvent(ImGuiKey.Space, Input.IsHeld(Keys.Space));
+        io.AddKeyEvent(ImGuiKey.A, Input.IsHeld(Keys.A));
+        io.AddKeyEvent(ImGuiKey.W, Input.IsHeld(Keys.W));
+        io.AddKeyEvent(ImGuiKey.S, Input.IsHeld(Keys.S));
+        io.AddKeyEvent(ImGuiKey.D, Input.IsHeld(Keys.D));
 
         glfw.SetCharCallback(window, (wnd, codepoint) =>
         {

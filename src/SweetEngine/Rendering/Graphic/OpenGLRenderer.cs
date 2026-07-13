@@ -175,11 +175,11 @@ public unsafe struct OpenGLRenderer
 
     public void Render(ref GraphicContext context, in Intent intent)
     {
-        LineRenderMode(intent);
+        LineRenderMode();
 
-        device->Update(glfw, intent);
+        device->Update(glfw);
 
-        GuiRenderer.Update(ref context, in intent);
+        GuiRenderer.Update(ref context);
 
         frameBuffer->Bind(gl);
 
@@ -252,9 +252,9 @@ public unsafe struct OpenGLRenderer
         glfw.SwapBuffers(context.Window);
     }
 
-    private void LineRenderMode(Intent intent)
+    private void LineRenderMode()
     {
-        if (intent.IsHeld(Keys.Number1))
+        if (Input.IsHeld(Keys.Number1))
         {
             if (IsLineRender)
             {
@@ -263,7 +263,7 @@ public unsafe struct OpenGLRenderer
                 Console.WriteLine($"[Render Mode] => Fill mode");
             }
         }
-        else if (intent.IsHeld(Keys.Number2))
+        else if (Input.IsHeld(Keys.Number2))
         {
             if (!IsLineRender)
             {
