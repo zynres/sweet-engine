@@ -26,7 +26,10 @@ public unsafe struct Engine
 
     public void Init()
     {
+        Device = new();
         Context = Device.Init();
+        
+        Intent = new();
         Intent.Init(Context.Window, Context.Glfw);
 
         World = new();
@@ -40,8 +43,6 @@ public unsafe struct Engine
         Editor.Init();
 
         Gui = new();
-        Intent = new();
-        Device = new();
     }
 
     public void Dispose()
