@@ -4,3 +4,9 @@
 [submodule "libraries/sweetlib-collections"]
 	path = libraries/sweetlib-collections
 	url = https://github.com/zynres/sweetlib-collections.git
+[submodule "libraries/sweetlib-allocator"]
+	path = libraries/sweetlib-allocator
+	url = https://github.com/zynres/sweetlib-allocator.git
+[submodule "libraries/sweetlib-sheduler"]
+	path = libraries/sweetlib-sheduler
+	url = https://github.com/zynres/sweetlib-sheduler.git
