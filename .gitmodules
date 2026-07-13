@@ -10,3 +10,6 @@
 [submodule "libraries/sweetlib-sheduler"]
 	path = libraries/sweetlib-sheduler
 	url = https://github.com/zynres/sweetlib-sheduler.git
+[submodule "libraries/sweetlib-graphics"]
+	path = libraries/sweetlib-graphics
+	url = https://github.com/zynres/sweetlib-graphics.git
