@@ -1,6 +1,7 @@
 // Copyright © 2026 Zynres.
 // Licensed under the Apache-2.0 License.
 
+using SweetLib.Collections.Unsafe.Dictionary;
 using SweetLib.Collections.Unsafe.Array;
 using SweetLib.Collections.Unsafe.List;
 using SweetEngine.Library.Resources;
@@ -22,7 +23,7 @@ public unsafe struct ObjLoader
 
         UnsafeList<float> finalVerts = new(128);
         UnsafeList<uint> indices = new(128);
-        Dictionary<VertexKey, uint> vertexMap = new();
+        UnsafeDictionary<VertexKey, uint> vertexMap = new(128);
 
         UnsafeList<Vector3> vertexPositions = new(128);
         UnsafeList<Vector2> vertexUVs = new(128);
@@ -179,6 +180,8 @@ public unsafe struct ObjLoader
 
         finalVerts.Dispose();
         indices.Dispose();
+
+        vertexMap.Dispose();
 
         vertexPositions.Dispose();
         vertexUVs.Dispose();

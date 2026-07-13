@@ -1,9 +1,9 @@
 // Copyright © 2026 Zynres.
 // Licensed under the Apache-2.0 License.
 
+using SweetLib.Collections.Unsafe.Dictionary;
 using SweetEngine.Library.Resources;
 using SweetEngine.Core.Enums;
-using SweetEngine.Rendering;
 using Silk.NET.OpenGL;
 using StbImageSharp;
 
@@ -11,8 +11,8 @@ namespace SweetEngine.Ingestion.Loader.Textures;
 
 public unsafe struct Texture2DLoader
 {
-    private readonly Dictionary<TextureType, uint> default_maps;
-    private readonly Dictionary<TextureType, TextureUnit> units;
+    private readonly UnsafeDictionary<TextureType, uint> default_maps;
+    private readonly UnsafeDictionary<TextureType, TextureUnit> units;
 
     private readonly GL gl;
 
@@ -55,18 +55,11 @@ public unsafe struct Texture2DLoader
 
             gl.GenerateMipmap(GLEnum.Texture2D);
 
-            int filter = (int)GLEnum.LinearMipmapLinear;
+            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.LinearMipmapLinear);
+            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Linear);
 
-            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, ref filter);
-            filter = (int)GLEnum.Linear;
-
-            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, ref filter);
-            filter = (int)GLEnum.Repeat;
-
-            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, ref filter);
-            filter = (int)GLEnum.Repeat;
-
-            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, ref filter);
+            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
+            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
 
             gl.BindTexture(GLEnum.Texture2D, 0);
 
@@ -97,15 +90,11 @@ public unsafe struct Texture2DLoader
             gl.TexImage2D(GLEnum.Texture2D, 0, (int)InternalFormat.Rgba8, (uint)width,
                 (uint)height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pixels);
 
-            int filter = (int)GLEnum.Linear;
-            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, ref filter);
+            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Linear);
+            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Linear);
 
-            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, ref filter);
-
-            filter = (int)GLEnum.ClampToEdge;
-            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, ref filter);
-
-            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, ref filter);
+            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.ClampToEdge);
+            gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.ClampToEdge);
 
             gl.BindTexture(GLEnum.Texture2D, 0);
 
@@ -167,5 +156,11 @@ public unsafe struct Texture2DLoader
         gl.BindTexture(TextureTarget.Texture2D, 0);
 
         return tex;
+    }
+
+    public void Dispose()
+    {
+        default_maps.Dispose();
+        units.Dispose();
     }
 }

@@ -45,12 +45,8 @@ unsafe class Program
             mat->Textures.Set(0, _baseMap);
             mat->Textures.Set(1, _normalMap);
             mat->Textures.Set(2, _metallicMap);
-            mat->Color = new Vector4(
-                Random.Shared.NextSingle(),
-                Random.Shared.NextSingle(),
-                Random.Shared.NextSingle(),
-                Random.Shared.NextSingle());
-            
+            mat->Color = new Vector4(1, 1, 1, 1);
+
             rendering.AddObject(AssetDirectories.Models + "/NewSakuya.obj", mat);
             rendering.AddObject(AssetDirectories.Models + "/cube.obj", mat);
             rendering.InitializeObjects();
@@ -66,8 +62,8 @@ unsafe class Program
             }
 
             engine.Dispose();
-
             rendering.Dispose();
+            textureLoader.Dispose();
 
             glfw.DestroyWindow(window);
             glfw.Terminate();

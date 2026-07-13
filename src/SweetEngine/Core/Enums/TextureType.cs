@@ -6,4 +6,8 @@ public enum TextureType
     BaseMap,
     NormalMap,
     MetallicMap,
+    
+    PackedBase,
+    PackedNormal,
+    PackedMap
 }
